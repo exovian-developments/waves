@@ -26,7 +26,33 @@ BOLD='\033[1m'
 # Homebrew installs to: $(brew --prefix)/share/ai-behavior/
 # For development/testing, check relative to script location
 get_data_dir() {
-    # First, check if running from Homebrew installation
+    # Priority 1: Resolve the REAL location of the script (follow symlinks)
+    # This handles the case where the binary is symlinked from /opt/homebrew/bin/
+    # to a git repo — the repo always has the latest files.
+    local real_script
+    if command -v readlink &> /dev/null; then
+        real_script="$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null || readlink "${BASH_SOURCE[0]}" 2>/dev/null || echo "")"
+    fi
+
+    if [ -n "$real_script" ]; then
+        local real_dir="$(cd "$(dirname "$real_script")" && pwd)"
+        local real_parent="$(dirname "$real_dir")"
+        if [ -d "$real_parent/schemas" ] && [ -d "$real_parent/.claude/commands" ]; then
+            echo "$real_parent"
+            return
+        fi
+    fi
+
+    # Priority 2: Check relative to script path (without resolving symlinks)
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local parent_dir="$(dirname "$script_dir")"
+
+    if [ -d "$parent_dir/schemas" ] && [ -d "$parent_dir/.claude/commands" ]; then
+        echo "$parent_dir"
+        return
+    fi
+
+    # Priority 3: Homebrew share directory (static copy from brew install)
     local brew_prefix
     if command -v brew &> /dev/null; then
         brew_prefix="$(brew --prefix 2>/dev/null)"
@@ -36,17 +62,7 @@ get_data_dir() {
         fi
     fi
 
-    # Fallback: check relative to script (for development)
-    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    local parent_dir="$(dirname "$script_dir")"
-
-    # Check if schemas exist in parent directory (development mode)
-    if [ -d "$parent_dir/schemas" ] && [ -d "$parent_dir/.claude/commands" ]; then
-        echo "$parent_dir"
-        return
-    fi
-
-    # Last resort: check current directory structure
+    # Last resort: current directory
     if [ -d "./schemas" ] && [ -d "./.claude/commands" ]; then
         echo "."
         return
