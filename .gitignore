@@ -1,5 +1,9 @@
-# Claude Code
-.claude/
+# Claude Code (keep .claude/commands/ tracked — distributed with ai-behavior)
+.claude/*
+!.claude/commands/
+
+# Build artifacts
+*.plugin
 
 # macOS
 .DS_Store

@@ -1,0 +1,441 @@
+{
+  "meta": {
+    "product_name": "ai-behavior",
+    "product_codename": "ai-behavior protocol",
+    "owner": "Andrius V",
+    "created_at": "2026-03-04T12:00:00Z",
+    "last_updated": "2026-03-04T12:00:00Z",
+    "blueprint_type": "standard"
+  },
+
+  "problem": {
+    "pain": "AI coding agents (Claude Code, Codex, Gemini CLI) start every session blind — no memory of what the project is, what rules apply, what was done yesterday, or what remains. Developers repeat the same context, the agent re-discovers the same codebase, and multi-session work loses continuity. The result: wasted tokens, inconsistent outputs, and developer frustration scaling with project complexity.",
+    "reality": "Every developer using AI agents faces this daily. Context windows are finite, sessions are ephemeral, and there is no standard way to persist structured project knowledge between sessions or across different agents. Teams adopting AI-assisted development hit this wall within the first week — the productivity gains evaporate as projects grow beyond what fits in a single prompt.",
+    "unsolved": "Existing approaches are ad-hoc: developers paste fragments into CLAUDE.md, write long system prompts, or rely on agent memory features that are shallow and unstructured. No solution provides a formal, schema-validated protocol that works across multiple AI agents, supports both software and non-software projects, and covers the full lifecycle from project setup through task tracking to resolution."
+  },
+
+  "target_users": [
+    {
+      "id": 1,
+      "description": "A software developer using Claude Code daily on a medium-to-large codebase. They switch between features and bugs across sessions, losing context each time. They need the agent to remember the project architecture, follow established coding rules, and pick up where the last session left off without a 15-minute re-briefing."
+    },
+    {
+      "id": 2,
+      "description": "A tech lead or solo developer managing a product with multiple active workstreams. They need strategic visibility — what phases are planned, what milestones are in progress, what decisions were made and why — without maintaining a separate project management tool that the AI agent cannot read."
+    },
+    {
+      "id": 3,
+      "description": "A non-software professional (researcher, creative, business planner) using AI agents for structured work. They need the same context persistence and task tracking benefits but without software-specific assumptions — their project has documents and deliverables, not code and endpoints."
+    }
+  ],
+
+  "product_hypothesis": "ai-behavior will eliminate context loss in AI-assisted development by providing a schema-validated protocol of structured JSON artifacts that persist project knowledge, coding rules, and work progress across sessions and across agents.",
+
+  "mission": "With ai-behavior, users run a slash command and their AI agent instantly knows the project structure, coding rules, current objectives, and work history — turning every session into a continuation, not a restart.",
+
+  "vision": "A universal protocol where any AI agent, on any project type, begins every session fully informed and operates within explicit, validated constraints — making structured, context-aware AI collaboration the default, not the exception.",
+
+  "out_of_scope": [
+    {
+      "id": 1,
+      "statement": "Runtime code execution or build system integration — ai-behavior produces JSON artifacts and markdown commands, it does not compile, run, or deploy anything. Tempting because implementation feedback loops would be valuable, but it would couple the protocol to specific runtimes."
+    },
+    {
+      "id": 2,
+      "statement": "Real-time collaboration or team sync — the protocol operates per-developer per-project. Multi-user conflict resolution is tempting but would require a server component that contradicts the file-based, local-first design."
+    },
+    {
+      "id": 3,
+      "statement": "Custom LLM fine-tuning or model training — the protocol works by structuring context in the prompt window via JSON schemas, not by training models. Tempting because fine-tuning could improve adherence, but it would lock the protocol to specific models."
+    },
+    {
+      "id": 4,
+      "statement": "Visual IDE plugin with UI panels — the protocol integrates through CLI slash commands and file-based artifacts. A full IDE GUI is tempting for discoverability but would fragment the codebase and limit agent-agnostic portability."
+    }
+  ],
+
+  "design_principles": [
+    {
+      "id": 1,
+      "principle": "The schema is the source of truth — every JSON field carries both a description (what) and a $comment (how the LLM should operate), so the protocol is self-documenting and any compliant LLM can generate valid output without external instructions.",
+      "rules_preview": [
+        "If a field has a $comment, the LLM must follow it as an operational instruction",
+        "If a generated file does not validate against its schema, it is invalid regardless of content quality"
+      ]
+    },
+    {
+      "id": 2,
+      "principle": "Context is layered: global (manifest, rules, preferences) loads at session start; focused (logbook) loads per task. This separation prevents context bloat while ensuring the agent always has what it needs.",
+      "rules_preview": [
+        "When starting a session, load global context before any task-specific context",
+        "When context exceeds limits, compact focused context before touching global context"
+      ]
+    },
+    {
+      "id": 3,
+      "principle": "The protocol must be agent-agnostic — the same JSON files work whether the user switches from Claude Code to Codex to Gemini CLI. No agent-specific features in the schema layer.",
+      "rules_preview": [
+        "If a schema field requires agent-specific behavior, it belongs in the command layer not the schema layer",
+        "When outputting artifacts, use JSON for structured data; offer .md only as an alternative for agents with JSON limitations"
+      ]
+    },
+    {
+      "id": 4,
+      "principle": "Commands must support progressive disclosure — new users discover features interactively (zero parameters), experienced users skip to fast execution (with parameters). Never force expert users through beginner flows.",
+      "rules_preview": [
+        "If a command receives no parameters, enter interactive mode and show a TIP for the fast path",
+        "If a command receives parameters, skip all interactive steps and execute directly"
+      ]
+    },
+    {
+      "id": 5,
+      "principle": "Heavy analysis is always delegated to subagents — the main thread handles user interaction and file writing only. This preserves the context window for long work sessions.",
+      "rules_preview": [
+        "When a command needs multi-file analysis, dispatch to a subagent via Task tool",
+        "When the main thread exceeds 3 file reads for analysis, refactor to use a subagent"
+      ]
+    },
+    {
+      "id": 6,
+      "principle": "The artifact hierarchy is strict: blueprint (WHAT/WHY) informs roadmap (WHEN/ORDER), which spawns logbooks (HOW/DETAIL). Information flows downward; detail is never duplicated upward.",
+      "rules_preview": [
+        "If implementation detail appears in a roadmap, move it to the logbook",
+        "If a logbook needs strategic context, reference the roadmap — do not copy it"
+      ]
+    }
+  ],
+
+  "essential_capabilities": [
+    {
+      "id": 1,
+      "capability": "The user can initialize a project with their interaction preferences (language, tone, project type) so that all subsequent AI sessions operate within those constraints without re-asking."
+    },
+    {
+      "id": 2,
+      "capability": "The user can generate a structured project manifest that captures architecture, technologies, features, and entry points — giving any AI agent a complete map of the codebase or project structure.",
+      "depends_on": [1]
+    },
+    {
+      "id": 3,
+      "capability": "The user can extract and maintain coding rules (software) or project standards (general) from the codebase, so the AI agent follows established patterns instead of inventing its own.",
+      "depends_on": [2]
+    },
+    {
+      "id": 4,
+      "capability": "The user can create a development logbook for a ticket or task with structured objectives, code references, and completion guides, so work is traceable and resumable across sessions.",
+      "depends_on": [2]
+    },
+    {
+      "id": 5,
+      "capability": "The user can update a logbook with progress entries, status changes, new objectives, and reminders — with automatic context compaction when the rolling window exceeds limits.",
+      "depends_on": [4]
+    },
+    {
+      "id": 6,
+      "capability": "The user can generate a resolution document from a completed logbook, producing a structured summary of what was done, what was learned, and what changed.",
+      "depends_on": [4]
+    }
+  ],
+
+  "non_essential_capabilities": {
+    "important": [
+      {
+        "id": 1,
+        "capability": "The user can update an existing manifest when the project evolves, using git-based or timestamp-based change detection to refresh only what changed."
+      },
+      {
+        "id": 2,
+        "capability": "The user can create and update a product-level roadmap with phases, milestones, and decisions that sits above individual logbooks and orchestrates the build order."
+      },
+      {
+        "id": 3,
+        "capability": "The user can trigger automated objective implementation where a subagent writes code following the logbook's completion guide and a second subagent audits the result against project rules."
+      },
+      {
+        "id": 4,
+        "capability": "The user can install the protocol as a Cowork plugin for Claude Desktop with automatic context loading at session start via hooks."
+      }
+    ],
+    "desired": [
+      {
+        "id": 1,
+        "capability": "The user can install ai-behavior globally via Homebrew and initialize per-project with a single CLI command."
+      },
+      {
+        "id": 2,
+        "capability": "The user can use manual prompts to generate protocol-compliant files without slash commands, enabling use with any LLM that can read JSON schemas."
+      },
+      {
+        "id": 3,
+        "capability": "The user can analyze remote GitHub repositories by providing a URL, with the system cloning and analyzing automatically."
+      }
+    ]
+  },
+
+  "essential_flows_and_views": {
+    "user_flows": [
+      {
+        "id": 1,
+        "name": "Project initialization",
+        "entry_point": "User runs /ai-behavior:project-init in a new project.",
+        "termination": "user_pref.json is created and CLAUDE.md is updated with required_reading references.",
+        "description": "The command asks 6 questions: language, name+role, project type (software/general), familiarity level, tone, explanation depth. Answers populate user_pref.json. CLAUDE.md is updated to reference ai_files/ artifacts so subsequent sessions auto-load context.",
+        "capability_refs": [1]
+      },
+      {
+        "id": 2,
+        "name": "Manifest creation for existing software project",
+        "entry_point": "User runs /ai-behavior:manifest-create after project-init.",
+        "termination": "project_manifest.json is written with full project analysis.",
+        "description": "The command detects project type from user_pref.json. For known software projects: 2 validation checkpoints, then 6 parallel subagents (entry-point-analyzer, navigation-mapper, flow-tracker, dependency-auditor, architecture-detective, feature-extractor) scan the codebase. Results are merged into a manifest following software_manifest_schema.json. User validates before write.",
+        "capability_refs": [2]
+      },
+      {
+        "id": 3,
+        "name": "Logbook creation and work tracking",
+        "entry_point": "User runs /ai-behavior:logbook-create TICKET-123.json.",
+        "termination": "Logbook file exists in ai_files/logbooks/ with objectives, scope, and completion guides.",
+        "description": "User describes the ticket. The command traces code references using the manifest, proposes main objectives with scope (files + rules), dispatches secondary-objective-generator subagent for completion guides. User validates at 3 checkpoints: analysis, main objectives, secondary objectives. Final logbook is written.",
+        "capability_refs": [4]
+      },
+      {
+        "id": 4,
+        "name": "Logbook update cycle",
+        "entry_point": "User runs /ai-behavior:logbook-update TICKET-123.json during a work session.",
+        "termination": "Logbook is updated with new context entries and/or status changes. Auto-compaction fires if recent_context exceeds 20 entries.",
+        "description": "The command loads the logbook, checks due reminders, displays current status table. User chooses operation: add progress, update objective status, add new objective, or add reminder. The context-summarizer subagent handles compaction when triggered. Multiple updates can chain in one session.",
+        "capability_refs": [5]
+      }
+    ],
+    "views": [
+      {
+        "id": 1,
+        "name": "Logbook status display",
+        "state": "success",
+        "description": "A table showing all objectives (main and secondary) with their current status (not_started/active/blocked/achieved/abandoned), plus the 3 most recent context entries. Displayed at the start of every logbook-update interaction so the user knows exactly where things stand.",
+        "capability_refs": [5]
+      },
+      {
+        "id": 2,
+        "name": "Manifest analysis output",
+        "state": "success",
+        "description": "Structured JSON output showing detected technologies, architecture layers, features, entry points, dependencies, and recommendations. Displayed for user validation before being written to disk.",
+        "capability_refs": [2]
+      }
+    ],
+    "system_flows": [
+      {
+        "id": 1,
+        "name": "Context auto-loading at session start",
+        "trigger": "AI agent session begins in a project with ai_files/ directory and CLAUDE.md references.",
+        "result": "Agent has global context (manifest, rules, preferences) loaded before the user issues any command.",
+        "description": "CLAUDE.md contains required_reading entries pointing to ai_files/. The agent reads user_pref.json (language, tone), project_manifest.json (architecture), and project_rules.json (constraints) on session start. In the plugin variant, a SessionStart hook automates this."
+      },
+      {
+        "id": 2,
+        "name": "Logbook context compaction",
+        "trigger": "recent_context array exceeds 20 entries during a logbook-update.",
+        "result": "Oldest entries are compressed into a history_summary paragraph. recent_context is trimmed to the 20 most recent entries. history_summary is capped at 10 summaries.",
+        "description": "The context-summarizer subagent receives the overflow entries, produces a concise summary preserving key decisions and findings, and appends it to history_summary. The main agent then trims recent_context. This rolling window ensures logbooks never grow unbounded while preserving institutional knowledge."
+      },
+      {
+        "id": 3,
+        "name": "Subagent dispatch for analysis",
+        "trigger": "A command requires multi-file scanning or deep code analysis.",
+        "result": "Structured JSON results returned to the main thread for user presentation.",
+        "description": "The main agent prepares an input prompt with project_root, the schema to follow, and what to analyze. It launches the subagent via Task tool (Claude Code) or Agent tool. The subagent operates in isolation with its own context window, performs the analysis, and returns structured output. The main agent merges results and presents to the user. Up to 6 subagents can run in parallel for manifest creation."
+      }
+    ]
+  },
+
+  "secondary_flows_and_views": {
+    "user_flows": [
+      {
+        "id": 1,
+        "name": "Manifest creation for unknown software project",
+        "entry_point": "User runs /ai-behavior:manifest-create on a project they did not build.",
+        "termination": "Manifest created with educational output explaining what was discovered.",
+        "description": "Zero-question flow. The command runs all 6 analysis subagents with progress prints so the user sees discovery in real-time. Output includes explanations of detected patterns, making it an educational experience. Useful for onboarding to unfamiliar codebases."
+      },
+      {
+        "id": 2,
+        "name": "General project manifest creation",
+        "entry_point": "User runs /ai-behavior:manifest-create on a non-software project (academic, creative, business).",
+        "termination": "Type-specific manifest created (research_manifest, creative_manifest, business_manifest, or general_manifest).",
+        "description": "Detects project type from user_pref.json. Routes to the appropriate subagent: academic (5 research questions), creative (5 concept questions), business (9-question Business Model Canvas), or generic (5 questions). Each flow produces a manifest structured for that domain."
+      },
+      {
+        "id": 3,
+        "name": "Rules update after code evolution",
+        "entry_point": "User runs /ai-behavior:rules-update after significant codebase changes.",
+        "termination": "Updated project_rules.json with new, modified, or deprecated rules.",
+        "description": "Uses git history or timestamp analysis to detect changed files since last update. Re-analyzes only changed files. The rule-comparator subagent diffs existing vs detected rules and proposes additions, modifications, or deprecations. User approves each change."
+      }
+    ],
+    "views": [
+      {
+        "id": 1,
+        "name": "Reminder check at logbook update",
+        "state": "alternative",
+        "description": "When a logbook has due reminders, they are displayed prominently before the normal status table. The user can acknowledge, snooze, or act on each reminder."
+      },
+      {
+        "id": 2,
+        "name": "Antipattern detection output",
+        "state": "alternative",
+        "description": "During rules-create, the antipattern-detector subagent outputs a list of detected bad practices with explanations and suggested corrections. Presented as educational content alongside the extracted rules."
+      }
+    ],
+    "system_flows": [
+      {
+        "id": 1,
+        "name": "Schema validation",
+        "trigger": "User runs validation command or CI pipeline checks generated JSON files.",
+        "result": "Pass/fail with specific field-level error messages.",
+        "description": "Generated JSON files can be validated against their schemas using standard tools (AJV for Node, jsonschema for Python). The schemas use JSON Schema draft 2020-12 with constraints (maxLength, minItems, enum, required) that catch structural errors."
+      },
+      {
+        "id": 2,
+        "name": "Plugin build and distribution",
+        "trigger": "Maintainer runs zip command in plugin/ directory after changes.",
+        "result": "ai-behavior.plugin file ready for distribution via GitHub Releases.",
+        "description": "The plugin/ directory is zipped into a .plugin file that Claude Desktop can install. The plugin manifest (plugin.json) carries version, description, and author metadata. GitHub Releases hosts the artifact. Users double-click to install."
+      }
+    ]
+  },
+
+  "product_rules": [
+    {
+      "id": 1,
+      "rule": "If a JSON schema field has a $comment, the LLM must treat it as an operational instruction that governs how to generate or validate that field's content.",
+      "principle_refs": [1],
+      "applies_to": "All schema-driven generation across every command"
+    },
+    {
+      "id": 2,
+      "rule": "When starting any AI session in a project with ai_files/, load user_pref.json, project_manifest.json, and project_rules.json before processing any user request.",
+      "principle_refs": [2],
+      "applies_to": "System flow: Context auto-loading at session start"
+    },
+    {
+      "id": 3,
+      "rule": "When a command requires scanning more than 3 files for analysis, dispatch the work to a specialized subagent instead of processing in the main thread.",
+      "principle_refs": [5],
+      "applies_to": "All commands that perform codebase analysis (manifest-create, rules-create, logbook-create)"
+    },
+    {
+      "id": 4,
+      "rule": "When a command is invoked without parameters, enter interactive mode with guided questions and display a TIP showing the fast-path syntax. When invoked with parameters, skip all interactive steps.",
+      "principle_refs": [4],
+      "applies_to": "All commands that accept optional parameters (logbook-create, logbook-update, rules-create, resolution-create)"
+    },
+    {
+      "id": 5,
+      "rule": "When recent_context in a logbook exceeds 20 entries, trigger automatic compaction: summarize overflow entries into history_summary and trim recent_context. Cap history_summary at 10 entries.",
+      "principle_refs": [2],
+      "applies_to": "Essential capability #5: Logbook update cycle"
+    },
+    {
+      "id": 6,
+      "rule": "When implementation detail appears in a roadmap field, move it to the corresponding logbook. The roadmap tracks phases and milestones; the logbook tracks code-level work.",
+      "principle_refs": [6],
+      "applies_to": "Roadmap creation and update commands"
+    },
+    {
+      "id": 7,
+      "rule": "When generating any protocol artifact, use JSON as the primary format. Offer .md only as a fallback for agents with known JSON limitations (e.g., Gemini CLI anchor issues).",
+      "principle_refs": [3],
+      "applies_to": "All file generation across every command"
+    },
+    {
+      "id": 8,
+      "rule": "When presenting a user question during any interactive flow, always include an 'I don't know (auto-detect)' option so the user is never blocked by lack of knowledge.",
+      "principle_refs": [4],
+      "applies_to": "All interactive commands"
+    }
+  ],
+
+  "success_metrics": [
+    {
+      "id": 1,
+      "metric": "Session continuity — time to productive work after session start",
+      "success_signal": "Developer issues their first real command within 30 seconds because global context loaded automatically and logbook provides immediate orientation.",
+      "failure_signal": "Developer spends the first 5+ minutes re-explaining project structure, rules, or current task status to the AI agent."
+    },
+    {
+      "id": 2,
+      "metric": "Protocol adoption across project lifecycle",
+      "success_signal": "A project uses at least manifest + rules + logbook consistently, with logbooks updated across multiple sessions showing compaction history.",
+      "failure_signal": "Users create manifest once and never update it, or create logbooks but abandon them after 2-3 entries because the overhead feels disproportionate."
+    },
+    {
+      "id": 3,
+      "metric": "Agent-agnostic portability",
+      "success_signal": "The same ai_files/ directory is usable when switching between Claude Code, Codex, and Gemini CLI without modification to the JSON artifacts.",
+      "failure_signal": "Users must maintain separate context files per agent, or generated files contain agent-specific instructions that break on other platforms."
+    },
+    {
+      "id": 4,
+      "metric": "Non-software project viability",
+      "success_signal": "Academic, creative, or business users complete a full workflow (manifest → logbook → resolution) with artifacts that feel native to their domain, not force-fitted from software templates.",
+      "failure_signal": "Non-software users hit dead ends where commands assume code, endpoints, or software architecture terminology."
+    }
+  ],
+
+  "tech_stack": "Pure JSON schemas (JSON Schema draft 2020-12) and Markdown command definitions. No runtime dependencies. Distribution via: (1) git clone + manual copy, (2) Homebrew formula (planned), (3) Cowork .plugin ZIP for Claude Desktop. Commands execute within AI agent environments — Claude Code slash commands (.claude/commands/), Cowork plugin agents/commands/skills, or raw prompts for other agents. Subagent orchestration uses the host agent's built-in delegation tools (Task tool in Cowork, Agent tool in Claude Code). Validation possible with any JSON Schema validator (AJV, jsonschema). The protocol is stateless at the system level — all state lives in JSON files on the user's filesystem.",
+
+  "product_decisions": [
+    {
+      "id": 1,
+      "created_at": "2025-11-21T00:00:00Z",
+      "decision": "Use description + $comment pattern in JSON schemas to carry both semantic meaning and LLM operational instructions in the same file.",
+      "context": "Evaluated alternatives: separate instruction files, embedded markdown, custom schema extensions. The $comment approach keeps everything in one file, is valid JSON Schema, and self-documents behavior without requiring external tooling. Discarded: YAML (less tooling support), custom DSL (adoption friction).",
+      "impact_on": "Design principle #1, all schemas"
+    },
+    {
+      "id": 2,
+      "created_at": "2025-11-21T00:00:00Z",
+      "decision": "Support 5 project types (software, academic, creative, business, general) with type-specific schemas and command flows.",
+      "context": "Initially designed for software only. Expanded after recognizing that structured context management benefits any domain. Each type gets its own manifest schema and creation flow. Shared: user_pref, logbook structure, roadmap. Discarded: single universal schema (too many optional fields, confusing UX).",
+      "impact_on": "Essential capability #2, manifest-create command"
+    },
+    {
+      "id": 3,
+      "created_at": "2026-02-13T00:00:00Z",
+      "decision": "Implement Cowork plugin as an adapted packaging of the canonical subagent/command design, consolidating 33 subagents into 17 plugin agents.",
+      "context": "Cowork plugin format requires agents/ and commands/ directories with specific conventions. Rather than maintaining two separate designs, the canonical design in subagents/ and commands/ is the source of truth, and the plugin is a build-time adaptation. Some subagents are merged (e.g., autogen-detector + manifest-change-analyzer = change-analyzer) and others are inlined into command flows.",
+      "impact_on": "Distribution, plugin/"
+    },
+    {
+      "id": 4,
+      "created_at": "2026-02-26T00:00:00Z",
+      "decision": "Add three-tier artifact hierarchy: blueprint (WHAT/WHY) → roadmap (WHEN/ORDER) → logbook (HOW/DETAIL).",
+      "context": "Logbooks alone were insufficient for product-level planning. Users needed a way to sequence phases and track strategic decisions above the task level. The roadmap bridges the gap. The blueprint (product_blueprint_schema.json) formalizes the highest level. Information flows downward — roadmaps reference blueprints, logbooks reference roadmaps. Discarded: flat structure with tags (loses hierarchy), single mega-document (loses separation of concerns).",
+      "impact_on": "Design principle #6, roadmap commands, logbook_roadmap_schema.json"
+    }
+  ],
+
+  "open_questions": [
+    {
+      "id": 1,
+      "created_at": "2026-03-04T12:00:00Z",
+      "question": "Should the Homebrew distribution be prioritized over the plugin-only distribution, given that Cowork plugin covers the richest experience?",
+      "status": "open",
+      "resolution": null
+    },
+    {
+      "id": 2,
+      "created_at": "2026-03-04T12:00:00Z",
+      "question": "How should schema versioning and migration be handled when breaking changes occur — automatic migration script vs manual migration guide vs version detection with warnings?",
+      "status": "open",
+      "resolution": null
+    },
+    {
+      "id": 3,
+      "created_at": "2026-03-04T12:00:00Z",
+      "question": "Should the protocol define a standard for sharing ai_files/ artifacts between team members (e.g., which files are personal vs shared), or leave that entirely to user discretion?",
+      "status": "open",
+      "resolution": null
+    }
+  ]
+}

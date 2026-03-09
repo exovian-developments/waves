@@ -11,10 +11,12 @@
 **Flow:**
 1. Select logbook →
 2. Select objective →
-3. Implementer subagent writes code →
-4. Auditor subagent verifies compliance →
-5. If non-compliant, loop back with fixes →
+3. Main agent implements code directly →
+4. Main agent audits compliance directly →
+5. If non-compliant, main agent fixes and re-audits →
 6. Update logbook with progress
+
+**IMPORTANT: No subagent delegation.** All implementation and auditing steps are executed directly by the main agent to preserve full context (project rules, manifest, resolved decisions, prior objectives). Subagents lose accumulated context and can produce code that contradicts project conventions.
 
 **Parameters:** `[logbook]` (optional) - Name of the logbook file
 
@@ -31,10 +33,7 @@
 
 ## Subagents
 
-| Subagent | Purpose |
-|----------|---------|
-| **code-implementer** | Reads rules, manifest, objective; writes code; generates change manifest |
-| **code-auditor** | Validates changes against project rules; returns compliance report |
+This command does NOT use subagents. All steps (implementation, auditing, retry fixes) are executed directly by the main agent to preserve full context and avoid deviations from project conventions and resolved decisions.
 
 ---
 
@@ -97,9 +96,9 @@ IF first time:
 This command helps you implement objectives from your logbook:
 
 1. 📋 Select a logbook and objective
-2. 🤖 An AI agent implements the code following your project rules
-3. 🔍 Another AI agent audits compliance with rules
-4. 🔄 If issues found, automatically fixes and re-audits
+2. 🤖 I implement the code directly following your project rules
+3. 🔍 I audit compliance with rules directly
+4. 🔄 If issues found, I automatically fix and re-audit
 5. ✅ Updates your logbook with progress
 
 Continue? (Yes/No)
@@ -277,7 +276,7 @@ Build context object:
 
 ---
 
-## Step 5: Invoke Code Implementer
+## Step 5: Implement Code Directly
 
 ```
 🤖 Starting implementation...
@@ -285,52 +284,35 @@ Build context object:
 Objective: [objective.content]
 ```
 
-MAIN AGENT invokes **code-implementer** subagent with:
-- Implementation context (from Step 4)
-- `project_manifest_path`
-- `project_rules_path`
-- `preferred_language`
+**Execute the implementation directly (no subagents).** Using the context from Step 4:
 
-### Subagent Progress (visible to user):
+1. **Read all reference files** from the completion guide
+2. **Read applicable project rules** to ensure compliance during writing
+3. **Implement the code** following:
+   - Project manifest patterns and conventions
+   - Applicable rules from `project_rules.json`
+   - Completion guide steps as implementation checklist
+   - Resolved decisions from the logbook
+4. **Track changes** as you implement:
+   - Files created (+) and modified (-)
+   - Patterns applied
+   - Any discoveries, deviations, or impediments found
+5. **Run `dart analyze`** (or equivalent for the project) to verify no errors
 
-```
-🔧 Implementing: ProductDetailDTO
-
-  [1/4] Reading reference files...
-  [2/4] Analyzing patterns...
-  [3/4] Writing code...
-  [4/4] Generating change manifest...
-```
-
-### Subagent Returns:
-
+Store the implementation results as `change_manifest`:
 ```json
 {
-  "success": true,
-  "changes": [
-    {
-      "file": "src/dtos/ProductDetailDTO.ts",
-      "action": "created",
-      "lines_added": 45,
-      "description": "New DTO with specifications array"
-    }
-  ],
-  "change_manifest": {
-    "objective_id": "1.1",
-    "files_modified": ["src/dtos/ProductDetailDTO.ts"],
-    "files_created": ["src/dtos/ProductDetailDTO.ts"],
-    "files_deleted": [],
-    "patterns_applied": ["BaseDTO inheritance", "@Expose decorators"],
-    "rules_followed": [3],
-    "code_snippets": [
-      {
-        "file": "src/dtos/ProductDetailDTO.ts",
-        "content": "... full file content or key sections ..."
-      }
-    ],
-    "implementation_notes": "Created DTO extending BaseDTO with specifications array field"
-  },
-  "summary": "Created ProductDetailDTO.ts with specifications array, following BaseDTO pattern"
+  "changes": [{"file": "...", "action": "created|modified", "lines": N}],
+  "patterns_applied": ["..."],
+  "implementation_findings": {
+    "discoveries": [],
+    "plan_deviations": [],
+    "new_decisions": [],
+    "impediments_found": [],
+    "ambiguities_consulted": [],
+    "new_objectives_suggested": [],
+    "recommendations": []
+  }
 }
 ```
 
@@ -353,60 +335,30 @@ MAIN AGENT invokes **code-implementer** subagent with:
 
 ---
 
-## Step 7: Invoke Code Auditor
+## Step 7: Audit Compliance Directly
 
-MAIN AGENT invokes **code-auditor** subagent with:
-- `change_manifest` (from implementer)
-- `project_rules` (full rules that apply)
-- `preferred_language`
+**Execute the audit directly (no subagents).** For each file in `change_manifest.changes`:
 
-### Subagent Progress:
-
-```
-🔍 Auditing compliance...
-
-  [1/3] Reading modified files...
-  [2/3] Checking rule #3: @Expose decorators...
-  [3/3] Validating patterns...
-```
-
-### Subagent Returns (Compliant):
-
+1. **Read the file** that was created or modified
+2. **Check against each applicable rule** from Step 4:
+   - Verify naming conventions (CSN-*)
+   - Verify architecture patterns (ARCH-*)
+   - Verify domain rules (DOM-*)
+   - Verify Dart best practices (DART-*)
+   - Verify any project-specific rules
+3. **Record findings** with severity:
+   - `error`: Rule violation that must be fixed
+   - `warning`: Potential issue, review recommended
+   - `info`: Observation, no action needed
+4. **Build audit response:**
 ```json
 {
-  "compliant": true,
-  "rules_checked": [3, 7],
-  "findings": [],
-  "summary": "All rules satisfied. Code follows project conventions."
-}
-```
-
-### Subagent Returns (Non-Compliant):
-
-```json
-{
-  "compliant": false,
-  "rules_checked": [3, 7],
+  "compliant": true|false,
+  "rules_checked": ["rule_ids"],
+  "rules_skipped": [{"id": "...", "reason": "..."}],
   "findings": [
-    {
-      "rule_id": 3,
-      "severity": "error",
-      "file": "src/dtos/ProductDetailDTO.ts",
-      "line": 15,
-      "issue": "Field 'specifications' missing @Expose() decorator",
-      "expected": "@Expose() decorator on public field",
-      "found": "No decorator"
-    },
-    {
-      "rule_id": 3,
-      "severity": "warning",
-      "file": "src/dtos/ProductDetailDTO.ts",
-      "line": 8,
-      "issue": "Consider adding @Type() for nested array",
-      "suggestion": "@Type(() => SpecificationDTO)"
-    }
-  ],
-  "summary": "Found 1 error and 1 warning. Requires fixes."
+    {"severity": "error|warning|info", "rule_id": "...", "file": "...", "line": N, "issue": "..."}
+  ]
 }
 ```
 
@@ -442,15 +394,13 @@ All project rules satisfied:
 🔄 Attempting automatic fix... (Attempt 1/3)
 ```
 
-MAIN AGENT re-invokes **code-implementer** with:
-- Original context
-- `audit_findings` (the issues to fix)
-- `retry_attempt: 1`
-- Instruction: "Fix the following compliance issues"
+Fix the audit findings directly:
+- Read each file with findings
+- Apply fixes for each error-level finding
+- Re-run `dart analyze` to verify
+- Update `change_manifest` with the fixes
 
-Repeat Steps 5-7 until:
-- Compliant → Go to Step 9
-- Max retries (3) reached → Go to Step 8C
+Increment retry_count, go back to Step 6.
 
 ### Step 8C: Max Retries Exceeded
 

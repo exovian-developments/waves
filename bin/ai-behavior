@@ -11,7 +11,7 @@
 
 set -e
 
-VERSION="1.0.0"
+VERSION="0.3.0"
 
 # Colors for output
 RED='\033[0;31m'
@@ -73,6 +73,8 @@ show_help() {
     echo -e "${BOLD}COMMANDS${NC}"
     echo "    init [agent]    Initialize ai-behavior in current directory"
     echo "                    Supported agents: claude, codex (coming soon)"
+    echo "    update          Update schemas and commands in current directory"
+    echo "                    Auto-detects installed agent(s), preserves user data"
     echo ""
     echo -e "${BOLD}OPTIONS${NC}"
     echo "    --version, -v   Show version"
@@ -81,6 +83,7 @@ show_help() {
     echo -e "${BOLD}EXAMPLES${NC}"
     echo "    ai-behavior init           # Interactive agent selection"
     echo "    ai-behavior init claude    # Initialize for Claude Code"
+    echo "    ai-behavior update         # Update current project in-place"
     echo ""
     echo -e "${BOLD}AFTER INITIALIZATION${NC}"
     echo "    1. Start your AI agent (claude or codex)"
@@ -227,7 +230,7 @@ init_claude() {
             local filename=$(basename "$schema")
             cp "$schema" "ai_files/schemas/$filename"
             echo -e "  ${GREEN}+${NC} $filename"
-            ((schema_count++))
+            schema_count=$((schema_count + 1))
         fi
     done
     echo -e "  ${GREEN}$schema_count schemas copied${NC}"
@@ -241,7 +244,7 @@ init_claude() {
             local filename=$(basename "$cmd")
             cp "$cmd" ".claude/commands/$filename"
             echo -e "  ${GREEN}+${NC} $filename"
-            ((cmd_count++))
+            cmd_count=$((cmd_count + 1))
         fi
     done
     echo -e "  ${GREEN}$cmd_count commands copied${NC}"
@@ -376,11 +379,91 @@ cmd_init() {
     echo ""
 }
 
+# Update command - non-interactive, auto-detects agent
+cmd_update() {
+    local data_dir
+    data_dir="$(get_data_dir)"
+
+    if [ -z "$data_dir" ]; then
+        echo -e "${RED}Error: Could not find ai-behavior data files${NC}"
+        echo ""
+        echo "Please reinstall ai-behavior:"
+        echo "  brew reinstall ai-behavior"
+        exit 1
+    fi
+
+    # Detect which agents are installed
+    local has_claude=false
+    local has_codex=false
+    local has_ai_files=false
+
+    [ -d ".claude/commands" ] && has_claude=true
+    [ -d ".codex/commands" ] && has_codex=true
+    [ -d "ai_files" ] && has_ai_files=true
+
+    if ! $has_claude && ! $has_codex && ! $has_ai_files; then
+        echo -e "${RED}Error: No ai-behavior installation detected in current directory${NC}"
+        echo ""
+        echo "Run ${CYAN}ai-behavior init${NC} first to set up your project."
+        exit 1
+    fi
+
+    echo -e "${BLUE}Updating ai-behavior to v${VERSION}...${NC}"
+    echo ""
+
+    # Update schemas
+    if $has_ai_files || $has_claude || $has_codex; then
+        mkdir -p ai_files/schemas
+        local schema_count=0
+        for schema in "$data_dir/schemas/"*.json; do
+            if [ -f "$schema" ]; then
+                local filename=$(basename "$schema")
+                cp "$schema" "ai_files/schemas/$filename"
+                schema_count=$((schema_count + 1))
+            fi
+        done
+        echo -e "  ${GREEN}✓${NC} $schema_count schemas updated"
+    fi
+
+    # Update Claude commands
+    if $has_claude; then
+        local cmd_count=0
+        for cmd in "$data_dir/.claude/commands/"*.md; do
+            if [ -f "$cmd" ]; then
+                local filename=$(basename "$cmd")
+                cp "$cmd" ".claude/commands/$filename"
+                cmd_count=$((cmd_count + 1))
+            fi
+        done
+        echo -e "  ${GREEN}✓${NC} $cmd_count Claude commands updated"
+    fi
+
+    # Update Codex commands (future)
+    if $has_codex; then
+        echo -e "  ${GREEN}✓${NC} Codex commands updated"
+    fi
+
+    # Show what was preserved
+    echo ""
+    echo -e "${GREEN}Preserved (untouched):${NC}"
+    [ -f "ai_files/user_pref.json" ] && echo -e "  ${CYAN}✓${NC} user_pref.json"
+    [ -f "ai_files/project_manifest.json" ] && echo -e "  ${CYAN}✓${NC} project_manifest.json"
+    [ -f "ai_files/project_rules.json" ] && echo -e "  ${CYAN}✓${NC} project_rules.json"
+    [ -d "ai_files/logbooks" ] && echo -e "  ${CYAN}✓${NC} logbooks/"
+    [ -f "ai_files/product_blueprint.json" ] && echo -e "  ${CYAN}✓${NC} product_blueprint.json"
+
+    echo ""
+    echo -e "${GREEN}${BOLD}Update complete!${NC} (v${VERSION})"
+}
+
 # Main entry point
 main() {
     case "${1:-}" in
         init)
             cmd_init "$2"
+            ;;
+        update|upgrade)
+            cmd_update
             ;;
         --version|-v)
             show_version

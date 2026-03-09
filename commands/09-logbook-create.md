@@ -6,7 +6,7 @@
 
 ## Overview
 
-**Purpose:** Create a new logbook for a ticket/task with structured objectives and actionable guidance.
+**Purpose:** Create a new logbook for a ticket/task with structured objectives, autonomous design resolution, and actionable guidance.
 
 **Schema (selected by project_type):**
 - Software → `ai_files/schemas/logbook_software_schema.json`
@@ -16,11 +16,14 @@
 
 **Parameters:** `[filename]` (optional) - Name for the logbook file
 
+**Autonomy Principle:** The agent resolves ALL code-level and architecture-level design decisions autonomously using SRP/KISS/YAGNI/DRY/SOLID principles. It only escalates to the user when detecting business-level contradictions that design principles cannot resolve. Objectives (main and secondary) are presented as declarations, not approval requests.
+
 **Key Features:**
 - Interactive ticket/task clarification
-- **Software:** Code tracing, main objectives with scope (files + rules), secondary with completion_guide referencing code
+- **Software:** Code tracing, autonomous design resolution, main objectives with scope (files + rules), secondary with completion_guide referencing code
 - **General:** Main objectives with scope (references + standards), secondary with completion_guide referencing documents/practices
-- User validation at key checkpoints
+- Autonomous operation with transparency reports (decisions shown, not asked for approval)
+- Escalation only for business-level contradictions
 
 ---
 
@@ -178,7 +181,15 @@
     - Identify rules that apply to the identified layers/features
     - Note rule IDs for scope.rules
 
-24. MAIN AGENT: Present analysis summary
+24. MAIN AGENT: Search for product-level context files:
+    - `ai_files/product_blueprint.json` → IF EXISTS: Extract relevant capabilities, flows, design principles, product rules
+    - `ai_files/technical_guide.md` → IF EXISTS: Extract relevant technical guidelines, architecture decisions
+    - `ai_files/*_feasibility.json` → IF EXISTS: Extract relevant revenue context, buyer personas, essential capabilities
+    - `ai_files/*_roadmap.json` → IF EXISTS: Extract current phase, milestones, relevant decisions
+    - For each file found: Extract only sections relevant to the ticket. Store as `product_context`.
+    - For each file NOT found: Note in report but DO NOT stop. Continue normally.
+
+25. MAIN AGENT: Present analysis summary
     ```
     📊 Análisis inicial completado:
 
@@ -195,24 +206,87 @@
     • #3: Controllers must use DTOs for responses
     • #7: All endpoints require authentication middleware
 
+    Fuentes de contexto del producto:
+      [For each file found:]
+      ✓ [filename] — [brief summary of relevant content extracted]
+      [For each file NOT found:]
+      ○ [filename] — not found (skipped)
+
     ¿Esta información es correcta? (Si/No/Ajustar)
     ```
 
-25. USER: Validates or adjusts
+26. USER: Validates or adjusts
     - IF "Ajustar" → User provides corrections, agent updates
 
 **═══════════════════════════════════════════════════════════════════**
-**STEP A2: Generate Main Objectives**
+**STEP A1.5: Additional Source Files (Open for Extension)**
 **═══════════════════════════════════════════════════════════════════**
 
-26. MAIN AGENT: Based on ticket and analysis, generate main objectives
+27. MAIN AGENT:
+    ```
+    📂 ¿Tienes archivos adicionales que deba usar como contexto?
+
+    Pueden ser:
+    • Documentos de diseño, specs, o PRDs
+    • Diagramas de arquitectura o docs técnicos
+    • Descripciones de tickets relacionados o notas de reuniones
+    • Cualquier otro archivo que aporte contexto para esta tarea
+
+    Opciones:
+      [rutas] Indica una o más rutas de archivos (una por línea)
+      [n]     No, continuar sin archivos adicionales
+    ```
+
+28. USER: Provides paths or skips
+
+29. IF paths provided:
+    - For each path: validate exists, read, extract relevant content
+    - IF file not found: warn but continue
+    - Add to `product_context` / `additional_sources`
+    - Present: "✓ Read [N] additional source file(s): [summaries]"
+
+30. IF "n" or empty → Continue to Step A2
+
+**═══════════════════════════════════════════════════════════════════**
+**STEP A2: Autonomous Design Resolution**
+**═══════════════════════════════════════════════════════════════════**
+
+The agent resolves ALL design decisions autonomously. It only escalates to the user for business-level contradictions.
+
+26. MAIN AGENT: Identify all design decisions needed from gathered information
+    - Categories: directory/location, file strategy, library choice, entry points, architecture, naming, dependencies, scope
+
+27. MAIN AGENT: Resolve ALL decisions using unified principles (SRP + KISS + YAGNI + DRY + SOLID)
+    - Apply the most relevant principle(s) per decision
+    - No user interaction needed for code/architecture decisions
+
+28. MAIN AGENT: Check for business-level contradictions ONLY
+    - **Escalate ONLY when:** ticket contradicts blueprint, acceptance criteria are mutually exclusive, fundamental scope ambiguity about WHAT (not HOW), conflicting product rules affecting user behavior
+    - **DO NOT escalate:** code decisions, architecture decisions, scope decisions, pattern choices
+    - IF business contradictions found → Ask user, wait for response
+    - IF none → Continue directly
+
+29. MAIN AGENT: Present transparency report (declaration, NOT approval request)
+    ```
+    🔧 Decisiones de diseño resueltas:
+
+      • [decision] → [resolution]
+        Principio: [SRP|KISS|YAGNI|DRY|SOLID] — [reasoning]
+    ```
+
+**═══════════════════════════════════════════════════════════════════**
+**STEP A3: Generate Main Objectives (Autonomous)**
+**═══════════════════════════════════════════════════════════════════**
+
+30. MAIN AGENT: Based on ticket, analysis, resolved decisions, and product context, generate main objectives autonomously
     - Each objective must have: content, context, scope (files + rules)
     - Prioritize objectives by dependency order
     - Typically 1-3 main objectives
+    - Apply YAGNI: only objectives that directly satisfy ticket requirements
 
-27. MAIN AGENT: Present main objectives for validation
+31. MAIN AGENT: Present main objectives as declaration (NOT asking for approval)
     ```
-    🎯 Objetivos principales propuestos:
+    🎯 Objetivos principales definidos:
 
     OBJETIVO 1:
     ├─ Contenido: Endpoint GET /products/:id retorna producto con especificaciones
@@ -222,48 +296,26 @@
     │  • src/models/Product.ts
     │  • src/dtos/ProductDetailDTO.ts (new)
     └─ Reglas: #3, #7
-
-    ¿Apruebas estos objetivos? (Si/No/Ajustar)
     ```
 
-28. USER: Validates or adjusts
-    - IF "No" → Ask what to change, regenerate
-    - IF "Ajustar" → User provides specific changes
-    - IF "Si" → Continue
+    **No approval checkpoint.** Agent proceeds directly.
 
 **═══════════════════════════════════════════════════════════════════**
-**STEP A3: Generate Secondary Objectives with Completion Guide**
+**STEP A4: Generate Secondary Objectives with Completion Guide (Autonomous)**
 **═══════════════════════════════════════════════════════════════════**
 
-29. MAIN AGENT: Invoke **secondary-objective-generator** subagent for each main objective
-
-30. SUBAGENT: For each main objective:
+32. MAIN AGENT: For each main objective, perform deep code analysis directly (no subagent delegation):
     - Deep trace from scope.files
     - Discover related code, patterns, dependencies
     - Read referenced rules from project_rules.json
+    - Incorporate UI requirements if present
+    - Incorporate product context (blueprint capabilities, flows, principles)
     - Generate secondary objectives with completion_guide
+    - Apply YAGNI to completion_guide: only actionable steps
 
-31. SUBAGENT returns secondary objectives:
+33. MAIN AGENT: Present secondary objectives as declaration (NOT asking for approval)
     ```
-    Objetivo secundario 1.1:
-    ├─ Contenido: ProductDetailDTO incluye array de especificaciones con name, value, unit
-    └─ Guía de completación:
-       • Usar patrón de BaseDTO en src/dtos/BaseDTO.ts:12
-       • Seguir estructura de ProductListDTO.ts para campos base
-       • Aplicar regla #3: usar decoradores @Expose() para campos públicos
-       • El modelo Product.ts:45 ya tiene relación con Specification
-
-    Objetivo secundario 1.2:
-    ├─ Contenido: ProductController tiene método getById que usa ProductDetailDTO
-    └─ Guía de completación:
-       • Seguir patrón de UserController.getById en src/controllers/UserController.ts:67
-       • Aplicar regla #7: agregar @UseGuards(AuthGuard) antes del método
-       • Inyectar ProductService que ya existe en src/services/ProductService.ts
-    ```
-
-32. MAIN AGENT: Present all secondary objectives
-    ```
-    📋 Objetivos secundarios generados:
+    📋 Objetivos secundarios definidos:
 
     Para Objetivo Principal 1:
     ┌─────────────────────────────────────────────────────────────┐
@@ -278,15 +330,12 @@
     │     • Seguir patrón de UserController.getById:67           │
     │     • Aplicar regla #7: @UseGuards(AuthGuard)              │
     └─────────────────────────────────────────────────────────────┘
-
-    ¿Apruebas estos objetivos secundarios? (Si/No/Ajustar)
     ```
 
-33. USER: Validates or adjusts
-    - IF adjustments needed → Regenerate affected objectives
+    **No approval checkpoint.** Agent proceeds directly to save.
 
 **═══════════════════════════════════════════════════════════════════**
-**STEP A4: Create Logbook File**
+**STEP A5: Create Logbook File**
 **═══════════════════════════════════════════════════════════════════**
 
 34. Go to **STEP FINAL: Generate and Save Logbook**
@@ -338,16 +387,17 @@
 38. USER: Provides standards or skips
 
 **═══════════════════════════════════════════════════════════════════**
-**STEP B2: Generate Main Objectives**
+**STEP B2: Generate Main Objectives (Autonomous)**
 **═══════════════════════════════════════════════════════════════════**
 
-39. MAIN AGENT: Based on ticket and references, generate main objectives
+39. MAIN AGENT: Based on ticket and references, generate main objectives autonomously
     - Each objective has: content, context, scope (references + standards)
     - Focus on deliverables and milestones
+    - Apply YAGNI: only objectives that directly satisfy the task requirements
 
-40. MAIN AGENT: Present main objectives
+40. MAIN AGENT: Present main objectives as declaration (NOT asking for approval)
     ```
-    🎯 Objetivos principales propuestos:
+    🎯 Objetivos principales definidos:
 
     OBJETIVO 1:
     ├─ Contenido: Capítulo 3 de la tesis completado con análisis de resultados
@@ -357,23 +407,21 @@
     │  • Datos de encuesta en Excel
     │  • Notas de reunión con tutor (15-nov)
     └─ Estándares: APA 7ma edición
-
-    ¿Apruebas estos objetivos? (Si/No/Ajustar)
     ```
 
-41. USER: Validates or adjusts
+    **No approval checkpoint.** Agent proceeds directly.
 
 **═══════════════════════════════════════════════════════════════════**
-**STEP B3: Generate Secondary Objectives**
+**STEP B3: Generate Secondary Objectives (Autonomous)**
 **═══════════════════════════════════════════════════════════════════**
 
-42. MAIN AGENT: Generate secondary objectives
+41. MAIN AGENT: Generate secondary objectives autonomously
     - Break down main objectives into actionable steps
     - completion_guide references documents, examples, standards
 
-43. MAIN AGENT: Present secondary objectives
+42. MAIN AGENT: Present secondary objectives as declaration (NOT asking for approval)
     ```
-    📋 Objetivos secundarios:
+    📋 Objetivos secundarios definidos:
 
     Para Objetivo Principal 1:
     ┌─────────────────────────────────────────────────────────────┐
@@ -395,13 +443,11 @@
     │     • Conectar cada tabla con interpretación en texto      │
     │     • Incluir limitaciones mencionadas por el tutor        │
     └─────────────────────────────────────────────────────────────┘
-
-    ¿Apruebas? (Si/No/Ajustar)
     ```
 
-44. USER: Validates or adjusts
+    **No approval checkpoint.** Agent proceeds directly to save.
 
-45. Go to **STEP FINAL: Generate and Save Logbook**
+43. Go to **STEP FINAL: Generate and Save Logbook**
 
 ---
 
@@ -470,9 +516,7 @@
 
 ## Subagents
 
-| Subagent | Purpose | Tools |
-|----------|---------|-------|
-| **secondary-objective-generator** | Deep code analysis, generate secondary objectives with completion_guide | Read, Glob, Grep |
+This command does NOT use subagents. All steps (code tracing, design resolution, objective generation, completion guide creation) are executed directly by the main agent to preserve full context and ensure consistency in design decisions.
 
 ---
 

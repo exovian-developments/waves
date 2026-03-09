@@ -10,9 +10,10 @@
 
 A working protocol for AI agents (`Claude Code`, `Codex`, `Gemini CLI`) that provides **interactive slash commands** and **structured JSON schemas** to manage project context, coding rules, and development logbooks.
 
-**Two ways to use it:**
-1. **Slash Commands (Recommended)** - Interactive commands that guide you through each process
-2. **Manual Prompts** - Copy/paste prompts to generate files from schemas
+**Three ways to use it:**
+1. **Cowork Plugin (Recommended)** - Install the plugin in Claude desktop for full GUI experience
+2. **Slash Commands** - Interactive commands for Claude Code CLI
+3. **Manual Prompts** - Copy/paste prompts to generate files from schemas
 
 **Pattern:** Each `json_schema` contains:
 - `description` = What the field represents, so the LLM understands what content to generate
@@ -32,9 +33,50 @@ A working protocol for AI agents (`Claude Code`, `Codex`, `Gemini CLI`) that pro
 
 ---
 
+## Quick Start (Cowork Plugin)
+
+### Install
+
+Download `ai-behavior.plugin` from [Releases](https://github.com/exovian-developments/ai-behavior/releases) and double-click to install in Claude desktop. Or build from source:
+
+```bash
+cd plugin/
+zip -r ../ai-behavior.plugin . -x "*.DS_Store"
+```
+
+### Usage
+
+Once installed, the plugin auto-loads your project context on session start. Use slash commands:
+
+```
+/project-init          # Initialize preferences and project context
+/manifest-create       # Analyze project and create manifest
+/logbook-create        # Create work logbook with objectives
+/logbook-update        # Track progress on objectives
+```
+
+The plugin dispatches analysis work to 16 specialized agents, keeping the main thread lean for long work sessions.
+
+See [`plugin/README.md`](plugin/README.md) for full plugin documentation.
+
+---
+
 ## Quick Start (Claude Code)
 
 ### 1. Install
+
+**Option A: Homebrew (recommended)**
+
+```bash
+brew tap exovian-developments/ai-behavior
+brew install ai-behavior
+
+# Initialize in your project
+cd your-project
+ai-behavior init claude
+```
+
+**Option B: Manual**
 
 ```bash
 # Clone the repository
@@ -46,6 +88,18 @@ cp -r ai-behavior/.claude/commands/* your-project/.claude/commands/
 mkdir -p your-project/ai_files/schemas
 cp ai-behavior/schemas/*.json your-project/ai_files/schemas/
 mkdir -p your-project/ai_files/logbooks
+```
+
+**Updating an existing project:**
+
+```bash
+# With Homebrew:
+brew upgrade ai-behavior
+cd your-project && ai-behavior update
+
+# Or from local clone:
+cd your-project
+/path/to/ai-behavior/bin/ai-behavior update
 ```
 
 ### 2. Initialize
@@ -91,16 +145,20 @@ Update progress, change objective statuses, add new objectives discovered during
 |---------|-------------|--------|
 | `/ai-behavior:project-init` | Initialize preferences and project context | 🟢 Ready |
 | `/ai-behavior:manifest-create` | Analyze project and create manifest | 🟢 Ready |
-| `/ai-behavior:manifest-update` | Update existing manifest with changes | 🔴 Coming Soon |
-| `/ai-behavior:rules-create` | Extract coding rules from codebase | 🟡 Needs Command |
-| `/ai-behavior:rules-update` | Update rules based on code changes | 🔴 Coming Soon |
-| `/ai-behavior:user-pref-create` | Create detailed user preferences | 🟡 Needs Command |
-| `/ai-behavior:user-pref-update` | Edit existing preferences | 🟡 Needs Command |
+| `/ai-behavior:manifest-update` | Update existing manifest with changes | 🟢 Ready |
+| `/ai-behavior:rules-create` | Extract coding rules from codebase | 🟢 Ready |
+| `/ai-behavior:rules-update` | Update rules based on code changes | 🟢 Ready |
+| `/ai-behavior:user-pref-create` | Create detailed user preferences | 🟢 Ready |
+| `/ai-behavior:user-pref-update` | Edit existing preferences | 🟢 Ready |
 | `/ai-behavior:logbook-create` | Create new development logbook | 🟢 Ready |
 | `/ai-behavior:logbook-update` | Update logbook with progress | 🟢 Ready |
-| `/ai-behavior:resolution-create` | Generate ticket resolution comment | 🟡 Needs Command |
+| `/ai-behavior:resolution-create` | Generate ticket resolution document | 🟢 Ready |
+| `/ai-behavior:objectives-implement` | Implement logbook objectives with auditing | 🟢 Ready |
+| `/ai-behavior:roadmap-create` | Create product-level roadmap with phases and milestones | 🟢 Ready |
+| `/ai-behavior:roadmap-update` | Update roadmap progress, decisions, and phases | 🟢 Ready |
+| `/ai-behavior:feasibility-analyze` | Pre-blueprint feasibility analysis with Monte Carlo and Bayesian projections | 🟢 Ready |
 
-**Legend:** 🟢 Ready | 🟡 Command file needed | 🔴 Subagents needed
+**Legend:** 🟢 Ready
 
 ---
 
@@ -116,6 +174,8 @@ Update progress, change objective statuses, add new objectives discovered during
 | `logbook_software_schema.json` | Development logbook with code refs | Software |
 | `logbook_general_schema.json` | Task logbook with doc refs | General |
 | `ticket_resolution_schema.json` | Ticket closure summary | Software |
+| `logbook_roadmap_schema.json` | Product-level roadmap with phases and milestones | Both |
+| `feasibility_analysis_schema.json` | Pre-blueprint feasibility analysis with projections | Both |
 
 ---
 
@@ -195,7 +255,7 @@ The `manifest-create` command adapts to your project:
 
 ## Specialized Subagents
 
-The commands use 29 specialized subagents (23 implemented):
+The commands use 33 specialized subagents:
 
 | Category | Subagents | Status |
 |----------|-----------|--------|
@@ -203,7 +263,9 @@ The commands use 29 specialized subagents (23 implemented):
 | **Software Analysis** | entry-point-analyzer, navigation-mapper, flow-tracker, dependency-auditor, architecture-detective, feature-extractor | ✅ Complete |
 | **General Projects** | manifest-creator-academic/creative/business/generic, general-project-scanner, directory-analyzer | ✅ Complete |
 | **Rules** | pattern-extractor, convention-detector, antipattern-detector, criteria-validator, standards-structurer | ✅ Complete |
-| **Updates** | git-history-analyzer, autogen-detector, manifest-change-analyzer, timestamp-analyzer, manifest-updater, rule-comparator | ⏳ Pending |
+| **Updates** | git-history-analyzer, autogen-detector, manifest-change-analyzer, timestamp-analyzer, manifest-updater, rule-comparator | ✅ Complete |
+| **Implementation** | code-implementer, code-auditor | ✅ Complete |
+| **Roadmap** | roadmap-creator, roadmap-updater | ✅ Complete |
 
 See [subagents/README.md](subagents/README.md) for full details.
 
@@ -337,13 +399,40 @@ python -c "import json,jsonschema; jsonschema.validate(json.load(open('data.json
 
 ---
 
+## Repository Structure
+
+```
+ai-behavior/
+├── schemas/              # Source of truth: 10 JSON schemas
+├── subagents/            # Canonical design: 33 subagent specifications
+├── commands/             # Command design docs (numbered, detailed)
+├── .claude/commands/     # Executable slash commands for Claude Code
+├── plugin/               # Cowork plugin (Claude desktop)
+│   ├── .claude-plugin/   #   Plugin manifest
+│   ├── agents/           #   17 specialized agents
+│   ├── commands/         #   13 slash commands
+│   ├── skills/           #   Protocol knowledge + schema references
+│   └── hooks/            #   SessionStart auto-context hook
+├── example_flutter/      # Example: Flutter project
+├── example_java/         # Example: Java project
+├── example_web/          # Example: Web project
+├── CHANGELOG.md          # Version history with subagent-to-agent mapping
+├── IMPLEMENTATION_GUIDE.md
+└── README.md
+```
+
+The `schemas/` and `subagents/` directories are the canonical design. The `plugin/` directory is an adapted implementation for the Cowork plugin format (17 agents consolidated from 33 subagents). See [CHANGELOG.md](CHANGELOG.md) for the mapping.
+
+---
+
 ## Compatibility
 
-| Agent | Slash Commands | Manual Prompts | Notes |
-|-------|---------------|----------------|-------|
-| Claude Code | ✅ | ✅ | Full support |
-| Codex | ❌ | ✅ | Use prompts directly |
-| Gemini CLI | ❌ | ✅ | Better with .md output |
+| Platform | Plugin | Slash Commands | Manual Prompts | Notes |
+|----------|--------|---------------|----------------|-------|
+| Claude Desktop (Cowork) | ✅ | ✅ | ✅ | Full support via plugin |
+| Claude Code | ❌ | ✅ | ✅ | Full support via .claude/commands/ |
+| Codex | ❌ | ❌ | ✅ | Use prompts directly |
+| Gemini CLI | ❌ | ❌ | ✅ | Better with .md output |
 
 **Note:** Gemini CLI works better producing results in `.md` format. For JSON output, it sometimes has issues with anchors.
 
@@ -361,6 +450,6 @@ python -c "import json,jsonschema; jsonschema.validate(json.load(open('data.json
 See [IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md) for architecture details and [subagents/README.md](subagents/README.md) for implementation status.
 
 **Current priorities:**
-1. Complete 6 pending subagents for update commands
-2. Create remaining 5 command files
-3. Test and refine all flows
+1. Test and refine all flows end-to-end
+2. Gather user feedback on command usability
+3. Keep plugin agents in sync with canonical subagent changes
