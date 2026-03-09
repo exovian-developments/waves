@@ -392,6 +392,31 @@ cmd_update() {
         exit 1
     fi
 
+    # Pull latest from remote if data_dir is a git repository
+    if [ -d "$data_dir/.git" ]; then
+        echo -e "${BLUE}Fetching latest ai-behavior from remote...${NC}"
+        local pull_output
+        if pull_output=$(cd "$data_dir" && git pull origin main 2>&1); then
+            if echo "$pull_output" | grep -q "Already up to date"; then
+                echo -e "  ${GREEN}✓${NC} Already up to date"
+            else
+                # Re-read version from the updated script
+                local new_version
+                new_version=$(grep '^VERSION=' "$data_dir/bin/ai-behavior" 2>/dev/null | head -1 | cut -d'"' -f2)
+                if [ -n "$new_version" ] && [ "$new_version" != "$VERSION" ]; then
+                    echo -e "  ${GREEN}✓${NC} Updated source ${YELLOW}v${VERSION}${NC} → ${GREEN}v${new_version}${NC}"
+                    VERSION="$new_version"
+                else
+                    echo -e "  ${GREEN}✓${NC} Source updated"
+                fi
+            fi
+        else
+            echo -e "  ${YELLOW}⚠${NC} Could not pull from remote (continuing with local files)"
+            echo -e "    ${CYAN}$pull_output${NC}" | head -3
+        fi
+        echo ""
+    fi
+
     # Detect which agents are installed
     local has_claude=false
     local has_codex=false
@@ -451,6 +476,13 @@ cmd_update() {
     [ -f "ai_files/project_rules.json" ] && echo -e "  ${CYAN}✓${NC} project_rules.json"
     [ -d "ai_files/logbooks" ] && echo -e "  ${CYAN}✓${NC} logbooks/"
     [ -f "ai_files/product_blueprint.json" ] && echo -e "  ${CYAN}✓${NC} product_blueprint.json"
+    [ -f "ai_files/product_foundation.json" ] && echo -e "  ${CYAN}✓${NC} product_foundation.json"
+    for feas in ai_files/*_feasibility.json; do
+        [ -f "$feas" ] && echo -e "  ${CYAN}✓${NC} $(basename "$feas")"
+    done
+    for road in ai_files/*_roadmap.json; do
+        [ -f "$road" ] && echo -e "  ${CYAN}✓${NC} $(basename "$road")"
+    done
 
     echo ""
     echo -e "${GREEN}${BOLD}Update complete!${NC} (v${VERSION})"
