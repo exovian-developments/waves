@@ -1,227 +1,223 @@
 <div align="center">
 
-# waves
+# Waves
 
 **[English](README.md) | [Español](README.es.md) | [Português](README.pt.md)**
 
+*O framework de desenvolvimento de produtos para a era dos agentes IA*
+
 </div>
 
-## O que é?
-Um protocolo de trabalho para agentes de IA (`Claude Code`, `Codex`, `Gemini CLI`) compatível com todos os tipos de projetos de software, baseado em um conjunto de arquivos `.json` (json_schema) que fornecem orientação para operação e geração de contextos para trabalhar com precisão em projetos reais.
+## Por que Waves
 
-**Padrão:** Cada `json_schema` contém o seguinte para cada objeto na estrutura:
-- `description` = Descrição do campo/propriedade, para que o LLM entenda claramente qual conteúdo gerar.
-- `$comment` = Como o LLM deve operar nesse campo, sem inferências e melhorando a precisão do resultado.
+O desenvolvimento de produtos como conhecíamos mudou. Agentes IA (Claude Code, Codex, Gemini CLI) comprimem o que antes levava 6 meses de desenvolvimento em dias ou semanas. Sprints de 2 semanas já não refletem o ritmo real do trabalho — o desenvolvimento não é mais o gargalo.
 
-## Resultados Comprovados
-Estes schemas foram usados e refinados com `Claude Code`, `Codex` e `Gemini CLI`* e são capazes de:
+Waves substitui sprints fixos por **ondas**: ciclos orgânicos de duração variável onde cada onda leva um incremento de produto desde a validação até a produção. Uma onda dura o tempo que precisa — às vezes 3 dias, às vezes 3 semanas. Sem cerimônias artificiais ou timeboxes arbitrários.
 
-**1. Gerar e trabalhar com contexto global do projeto**
-- Gerar um manifesto estruturado do projeto (linguagem, framework, arquitetura, padrões por camadas, funcionalidades, etc).
-- Gerar regras de codificação (padrões e standards) e segui-las.
-- Seguir o estilo de trabalho do usuário responsável.
+## O que é
 
-**2. Gerar e trabalhar com contexto focado em tarefas/tickets/histórias**
-- Geração de contexto "focado" por ticket de desenvolvimento que pode ser estendido entre vários LLMs e sessões (logbook).
-- Produzir código seguindo as regras do projeto (geradas previamente).
-- Criar um comentário de resolução estruturado por ticket baseado no logbook do ticket.
+Waves é um protocolo estruturado que guia agentes IA pelo **ciclo de vida completo de um produto** — da primeira ideia ao código em produção. Funciona com `Claude Code`, `Codex` e `Gemini CLI` através de comandos interativos e schemas JSON estruturados.
 
-**Nota: Gemini CLI** Em muitos testes, foi comprovado que `Gemini CLI` funciona melhor produzindo resultados em formato `.md` porque em `.json` frequentemente tem problemas com âncoras para adicionar e modificar elementos no `.json`.
+Em vez de dar ao seu agente um prompt em branco e esperar o melhor, Waves o guia por um processo claro: primeiro entender se a ideia é viável, depois definir o que construir, planejar em que ordem, e finalmente escrever o código — com contexto completo em cada passo.
 
-## 🛠️ Instalação
+### O Ciclo de Vida do Produto
 
-### Opção 1: Homebrew (Recomendado para macOS/Linux)
+Waves organiza o trabalho em cinco níveis, onde cada um se constrói sobre o anterior:
+
+**1. Viabilidade** → *Podemos construir isso? Devemos?*
+Você descreve sua ideia em linguagem natural. O agente atua como consultor de negócios: analisa o mercado, identifica concorrentes, constrói projeções de receita com simulações Monte Carlo, e te dá números honestos sobre se isso pode funcionar.
+
+**2. Foundation** → *O que aprendemos?*
+A viabilidade pode produzir milhares de simulações em múltiplos cenários. O foundation compacta tudo em um resumo executivo: o problema validado, quem são seus usuários, o modelo de receita com unit economics, análise SWOT, capacidades essenciais, restrições de timeline, e um sinal claro de go/no-go.
+
+**3. Blueprint** → *O que estamos construindo e por quê?*
+Usando o foundation como input, você define o produto: suas capacidades, fluxos de usuário, princípios de design, regras de produto, métricas de sucesso e stack tecnológico. Cada seção conecta com o caso de negócio. Nada especulativo.
+
+**4. Roadmap** → *Quando construímos e em que ordem?*
+O roadmap pega as capacidades do blueprint e as organiza em fases com milestones, dependências e pontos de decisão. Usa a convenção de ondas: `roadmap_w0.json` (foundation), `roadmap_w1.json`+ (ondas de negócio).
+
+**5. Logbook** → *Como implementamos esta peça específica?*
+Para cada ticket ou tarefa, um logbook divide o trabalho em objetivos principais e secundários com guias de completação. O agente os implementa continuamente, atualiza o progresso em tempo real, e preserva o contexto completo entre sessões.
+
+```
+viabilidade → foundation → blueprint → roadmap → logbook
+ PODEMOS?     O QUE         O QUÊ/POR  QUANDO?   COMO?
+              APRENDEMOS?   QUÊ?
+```
+
+Cada nível alimenta o próximo. Você pode começar em qualquer nível — se já tem um produto e só precisa de logbooks para o trabalho diário, comece aí.
+
+---
+
+## Características
+
+| Característica | Descrição |
+|----------------|-----------|
+| **Contexto Global** | Manifestos de projeto, regras de codificação, preferências de usuário |
+| **Contexto Focado** | Logbooks de desenvolvimento por tickets/tarefas com objetivos e acompanhamento |
+| **Multi-Agente** | Os mesmos arquivos funcionam com Claude Code, Codex e Gemini CLI |
+| **Multi-Sessão** | Logbooks preservam contexto entre sessões |
+| **Software + Geral** | Suporta projetos de software E acadêmicos, criativos, de negócio |
+
+---
+
+## Início Rápido (Plugin Cowork)
+
+### Instalar
+
+Baixe `waves.plugin` de [Releases](https://github.com/exovian-developments/waves/releases) e clique duas vezes para instalar no Claude desktop. Ou compile do código:
+
 ```bash
-brew tap exovian-developments/tap
+cd plugin/
+zip -r ../waves.plugin . -x "*.DS_Store"
+```
+
+### Uso
+
+O plugin auto-carrega o contexto do projeto ao iniciar sessão. Use os comandos:
+
+```
+/project-init          # Inicializar preferências e contexto
+/manifest-create       # Analisar projeto e criar manifesto
+/logbook-create        # Criar logbook com objetivos
+/logbook-update        # Registrar progresso nos objetivos
+```
+
+Veja [`plugin/README.md`](plugin/README.md) para documentação completa.
+
+---
+
+## Início Rápido (Claude Code)
+
+### 1. Instalar
+
+**Opção A: Homebrew (recomendado)**
+
+```bash
+brew tap exovian-developments/waves
 brew install waves
 
-# Da raiz do seu projeto
-waves
+# Inicializar no seu projeto
+cd seu-projeto
+waves init claude
 ```
 
-### Opção 2: Script de Instalação
-```bash
-# Baixe o script primeiro (SEMPRE inspecione scripts antes de executá-los)
-curl -O https://raw.githubusercontent.com/exovian-developments/waves/main/install.sh
+**Opção B: Manual**
 
-# Inspecione o conteúdo
-cat install.sh
-
-# Se parecer seguro, execute-o da raiz do seu projeto
-bash install.sh
-```
-
-⚠️ **Nota de Segurança:** Nunca execute scripts da internet sem revisá-los primeiro.
-
-### Opção 3: Instalação Manual
-
-**1.** Faça checkout do repositório `waves`.
 ```bash
 git clone https://github.com/exovian-developments/waves.git
+mkdir -p seu-projeto/.claude/commands
+cp -r waves/.claude/commands/* seu-projeto/.claude/commands/
+mkdir -p seu-projeto/ai_files/schemas
+cp waves/schemas/*.json seu-projeto/ai_files/schemas/
+mkdir -p seu-projeto/ai_files/logbooks
 ```
 
-**2.** Na raiz do seu projeto, crie o diretório `ai_files` e os seguintes subdiretórios:
-```bash
-mkdir -p ai_files/{schemas,logbooks}
+### 2. Inicializar
+
+No Claude Code:
+```
+/waves:project-init
 ```
 
-**3.** Copie os schemas localizados em `waves/schemas/` para o diretório `ai_files/schemas/` do seu projeto:
-```bash
-cp waves/schemas/*.json ai_files/schemas/
-```
-
-Schemas incluídos:
-  - `logbook_software_schema.json`
-  - `software_manifest_schema.json`
-  - `project_rules_schema.json`
-  - `ticket_resolution_schema.json`
-  - `user_pref_schema.json`
-
-**4.** Adicione a seguinte seção no início do arquivo do seu agente `CLAUDE.md`, `AGENT.md`, `GEMINI.md`.
-```
-# Key files to review on session start:
-  required_reading:
-    - path: "ai_files/project_manifest.json"
-      description: "Detailed explanation about structure, technologies, architecture and features of the current project"
-      when: "always"
-
-    - path: "ai_files/project_rules.json"
-      description: "This file contains the coding expectation, always follow these coding rules to keep the code consistency and cohesion"
-      when: "always"
-
-    - path: "ai_files/user_pref.json"
-      description: "This file contains the user interaction preferences when working, always follow this instructions"
-      when: "always"
-
-    - path: "ai_files/logbooks/"
-      description: "Directory to create and read logbooks related to development tickets. Ask for the logbook to read or create"
-      when: "always"
-
-    - path: "ai_files/schemas/software_manifest_schema.json"
-      description: "Json file with structure and guidance about how to create or update a project manifest"
-      when: "when_user_ask"
-
-    - path: "ai_files/schemas/project_rules_schema.json"
-      description: "Json file with structure and guidance about how to create coding rules, standards and criterias"
-      when: "when_user_ask"
-
-    - path: "ai_files/schemas/logbook_software_schema.json"
-      description: "Json file with structure and guidance about how to create a logbook to track and maintain conversational context for long-term memory and task tracking."
-      when: "when_user_ask"
-
-    - path: "ai_files/schemas/ticket_resolution_schema.json"
-      description: "Json file with structure and guidance about how to create a summary of the resolution of the work done"
-      when: "when_user_ask"
-
-    - path: "ai_files/schemas/user_pref_schema.json"
-      description: "Json file with structure and guidance about how to create a profile with guidance about how the interaction between the agent and the user"
-      when: "when_user_ask"
+### 3. Criar Manifesto
 
 ```
-
-**5.** _(Opcional)_ Adicione o diretório `ai_files/logbooks/` ao seu `.gitignore` para evitar commitar logbooks de trabalho:
-```bash
-echo "ai_files/logbooks/" >> .gitignore
+/waves:manifest-create
 ```
 
-## 🧭 Quando Usar
-- Projetos em Andamento: Comece criando o manifesto e regras a partir do código; depois use o logbook e o schema de resolução de tickets para o trabalho diário com tickets de desenvolvimento.
+### 4. Trabalhar com Logbooks
 
-- Projetos Novos (Greenfield): Use os schemas para gerar um manifesto e regras base para seu projeto; evolua conforme o código cresce.
-
-> [!IMPORTANT] Sobre os Prompts:
-> Os prompts incluídos são guias comprovados que você pode copiar e usar diretamente. Você também pode criar seus próprios prompts mantendo ou melhorando a ideia de acordo com seu contexto.
-
-## 🌎 Como Criar o Contexto Global
-
-**1.** Crie suas preferências de interação:
-- Arquivo resultante: `user_pref.json`
-- Schema: `ai_files/schemas/user_pref_schema.json`
-- Prompt _(Copie e cole na conversa com seu agente)_:
 ```
-Analise todo o arquivo user_pref_schema.json e com base na estrutura e descrição de cada propriedade e objeto no arquivo, faça-me perguntas para gerar o arquivo ai_files/user_pref.json. Depois de terminar as perguntas, gere o arquivo cumprindo o objetivo semântico de cada propriedade indicada no schema. Seja o moderador da conversa, seja conciso nas perguntas, não modifique o objeto final e se você ver que eu me desvio de alguma pergunta, seja proativo e retome o fio da conversa para gerar o arquivo.
+/waves:logbook-create TICKET-123.json
+/waves:logbook-update TICKET-123.json
 ```
 
-**2.** Crie o Manifesto do Projeto (Atualize de tempos em tempos)
-- Arquivo resultante: `project_manifest.json`
-- Schema: `ai_files/schemas/software_manifest_schema.json`
-- Prompt _(Copie e cole na conversa com seu agente)_:
+---
+
+## Comandos Disponíveis
+
+| Comando | Descrição | Status |
+|---------|-----------|--------|
+| `/waves:project-init` | Inicializar preferências e contexto | 🟢 Pronto |
+| `/waves:manifest-create` | Analisar projeto e criar manifesto | 🟢 Pronto |
+| `/waves:manifest-update` | Atualizar manifesto com mudanças | 🟢 Pronto |
+| `/waves:rules-create` | Extrair regras de codificação | 🟢 Pronto |
+| `/waves:rules-update` | Atualizar regras por mudanças no código | 🟢 Pronto |
+| `/waves:user-pref-create` | Criar preferências de usuário | 🟢 Pronto |
+| `/waves:user-pref-update` | Editar preferências existentes | 🟢 Pronto |
+| `/waves:logbook-create` | Criar logbook de desenvolvimento | 🟢 Pronto |
+| `/waves:logbook-update` | Atualizar logbook com progresso | 🟢 Pronto |
+| `/waves:resolution-create` | Gerar documento de resolução | 🟢 Pronto |
+| `/waves:objectives-implement` | Implementar objetivos com auditoria | 🟢 Pronto |
+| `/waves:roadmap-create` | Criar roadmap com fases e milestones | 🟢 Pronto |
+| `/waves:roadmap-update` | Atualizar progresso e decisões do roadmap | 🟢 Pronto |
+| `/waves:feasibility-analyze` | Análise de viabilidade com Monte Carlo e Bayesian | 🟢 Pronto |
+| `/waves:foundation-create` | Compactar viabilidade em fatos validados | 🟢 Pronto |
+| `/waves:blueprint-create` | Criar blueprint completo a partir do foundation | 🟢 Pronto |
+
+---
+
+## Schemas
+
+| Schema | Propósito | Tipo de Projeto |
+|--------|-----------|-----------------|
+| `user_pref_schema.json` | Preferências de interação | Ambos |
+| `software_manifest_schema.json` | Estrutura e tecnologia do projeto | Software |
+| `general_manifest_schema.json` | Estrutura de projeto não-software | Geral |
+| `project_rules_schema.json` | Regras e padrões de codificação | Software |
+| `project_standards_schema.json` | Padrões para projetos gerais | Geral |
+| `logbook_software_schema.json` | Logbook com refs de código | Software |
+| `logbook_general_schema.json` | Logbook com refs de documentos | Geral |
+| `ticket_resolution_schema.json` | Resumo de fechamento de ticket | Software |
+| `logbook_roadmap_schema.json` | Roadmap com fases e milestones | Ambos |
+| `feasibility_analysis_schema.json` | Análise de viabilidade | Ambos |
+| `product_foundation_schema.json` | Ponte viabilidade → blueprint | Ambos |
+
+---
+
+## Como Funcionam os Schemas
+
+Cada JSON schema usa um padrão de dupla instrução:
+
+- `description` = O que o campo representa, para que o LLM entenda que conteúdo gerar
+- `$comment` = Como o LLM deve operar nesse campo, melhorando a precisão e consistência
+
+---
+
+## Estrutura do Repositório
+
 ```
-Analise todo o arquivo software_manifest_schema.json, depois com base na estrutura e descrição de cada propriedade e objeto no arquivo, analise o projeto atual e identifique estritamente o que é solicitado no arquivo; para fazer a análise, vá a cada diretório e arquivo do projeto; não ignore caminhos ou arquivos porque podem ser relevantes para descobrir padrões, arquitetura ou funcionalidades do projeto. Finalmente gere o arquivo ai_files/project_manifest.json cumprindo o objetivo semântico de cada propriedade indicada no schema.
+waves/
+├── schemas/              # Fonte de verdade: 11 JSON schemas
+├── subagents/            # Design canônico: 33 especificações de subagentes
+├── commands/             # Documentos de design de comandos
+├── .claude/commands/     # Comandos executáveis para Claude Code
+├── plugin/               # Plugin Cowork (Claude desktop)
+│   ├── agents/           #   17 agentes especializados
+│   ├── commands/         #   13 comandos
+│   ├── skills/           #   Conhecimento do protocolo + refs de schemas
+│   └── hooks/            #   Hook SessionStart auto-contexto
+├── example_flutter/      # Exemplo: Projeto Flutter
+├── example_java/         # Exemplo: Projeto Java
+├── example_web/          # Exemplo: Projeto Web
+└── CHANGELOG.md          # Histórico de versões
 ```
 
-**3.** Crie as Regras do Projeto: Seja um projeto em andamento ou novo, é recomendado criar regras por camadas, para que você possa criar ou identificar regras de acordo com as boas práticas específicas da camada e abordar particularidades com atenção. É recomendado ter suporte ou experiência para evitar over-engineering neste processo.
-- Arquivo resultante: `project_rules.json`
-- Schema: `ai_files/schemas/project_rules_schema.json`
-- Recomendação: Envie um prompt separado para cada `layer` de `project_manifest.technical_details.architecture_identified`.
-- Riscos: Over-engineering foi detectado, mas se você reforçar o princípio YAGNI no prompt, melhora bastante.
-- Prompt _(indique a camada a analisar de acordo com o detectado no `project_manifest`)_:
-```
-Analise todo o arquivo project_rules_schema.json, depois analise a camada <layer> e tudo relacionado de acordo com ai_files/project_manifest.json e depois vá ao código do projeto e busque classes, objetos, funções e métodos relacionados, rastreie tudo relacionado e de acordo com o conteúdo encontrado identifique padrões, gere regras de arquitetura que foram aplicadas, extraia e gere convenções de nomenclatura, convenções de estrutura de classes, até considere padrões que não sejam boas práticas mas que foram implementados ao longo do conteúdo analisado. Sempre siga os critérios indicados em project_rules_schema.json quando criar uma regra e sempre aplique o princípio YAGNI. Finalmente atualize o arquivo ai_files/project_rules.json seguindo as instruções em ai_files/schemas/project_rules_schema.json, se o arquivo project_rules.json ainda não existe, então crie-o baseado na estrutura indicada em project_rules_schema.json e no conteúdo analisado.
-```
+---
 
-## 🎯 Contexto Focado - O Verdadeiro Poder!
-**O Logbook**
+## Compatibilidade
 
-O logbook do ticket/história é o arquivo `.json` que contém o contexto focado em objetivos primários, secundários e registros de descobertas/progresso/problemas encontrados enquanto você trabalha, o resultado é um arquivo universal útil para qualquer agente, reutilizável por qualquer LLM, você pode até começar com um agente (por exemplo `claude code`) e mudar para `codex` se ele não resolver um problema corretamente.
+| Plataforma | Plugin | Slash Commands | Prompts Manuais | Notas |
+|------------|--------|---------------|-----------------|-------|
+| Claude Desktop (Cowork) | ✅ | ✅ | ✅ | Suporte completo via plugin |
+| Claude Code | ❌ | ✅ | ✅ | Suporte completo via .claude/commands/ |
+| Codex | ❌ | ❌ | ✅ | Usar prompts diretamente |
+| Gemini CLI | ❌ | ❌ | ✅ | Melhor com output em .md |
 
-Você pode ter duas sessões abertas com agentes diferentes desde que não estejam modificando arquivos no mesmo turno/tempo, você pode trabalhar simultaneamente, o importante é que cada agente adicione seus registros ao array de contexto recente do logbook.
-- Arquivo resultante: `ai_files/logbooks/{logbookName}.json`
-- Schema: `ai_files/schemas/logbook_software_schema.json`
+---
 
-**1.** Inicie a sessão de trabalho com seu agente: `claude`, `codex` ou `gemini`.
+## Licença
 
-**2.** Forneça um prompt com detalhes do ticket/história a desenvolver. _(Copie/Cole o conteúdo ou conecte MCP tool e cole a URL do ticket ao agente)_.
-- __Prompt de exemplo__:
-```
-(Este é um prompt de exemplo) Estaremos trabalhando na criação de um novo endpoint para que aplicações frontend (web e mobile) possam obter detalhes de produtos, este é o schema que devemos cumprir: ...[conteúdo técnico da API] ... e estes são os critérios de aceitação do ticket: ...[Critérios de aceitação]..., você tem alguma pergunta?
-```
-
-**3.** Rastreie código relacionado e planeje o trabalho:
-- Prompt _(Copie e cole na conversa com seu agente)_:
-```
-De acordo com o ticket que compartilhei com você, vá ao código e rastreie arquivos/classes/funções/métodos/constantes/testes relacionados ao ticket. Use ai_files/project_manifest como guia inicial de alto nível. Depois gere uma lista de ações para alcançar o objetivo, ordene-a em ordem de resolução de dependências primeiro. Apresente para revisão, ajuste e confirmação humana.
-```
-
-**4.** Confirme o plano _(revisão humana)_:
-- Usuário ajusta a lista, removendo ou adicionando detalhes para execução limpa preparada para as modificações em questão.
-- Usuário solicita ver a versão "confirmada" da lista de ações. Confirma que os passos têm uma ordem lógica.
-
-**5.** Crie o logbook _(Nome do arquivo a ser criado deve ser indicado)_
-- Prompt _(Ajuste este prompt, copie e cole na conversa com seu agente)_:
-```
-Analise todo o arquivo ai_files/schemas/logbook_software_schema.json, depois com base na lista de ações que foi revisada e aprovada, crie o logbook ai_files/logbooks/{fileName}.json cumprindo o objetivo semântico de cada propriedade do schema. De agora em diante você será o moderador que mantém os objetivos do logbook atualizados, portanto, se você detectar que um novo objetivo aparece (primário ou secundário) adicione-o ou se algum for completado, mova-o para sua respectiva estrutura.
-```
-
-**6.** De tempos em tempos ou progresso _(Como salvar progresso em um videogame)_:
-- Prompt (iterativo):
-```
-Com base no progresso, descobertas e problemas que tivemos, atualize o logbook de acordo com as regras do schema e crie comentários concisos no contexto recente, atualize os objetivos e o mantenha atualizado.
-```
-
-## Ao Finalizar um Ticket/História de Desenvolvimento (Opcional)
-
-**Comentário de Resolução Técnica**
-
-Tornou-se boa prática deixar um resumo rico do trabalho realizado para fechar cada ticket, para isso:
-
-**1.** Criação do comentário de resolução do ticket:
-- Arquivo: Não aplicável - Um comentário é entregue na tela.
-- Schema: `ai_files/schemas/ticket_resolution_schema.json`
-- Prompt _(Nome do logbook a analisar deve ser indicado)_:
-```
-Analise o arquivo ai_files/schemas/ticket_resolution_schema.json e com base no logbook ai_files/logbooks/{logbookName}.json crie um comentário de resolução em formato Markdown para copiar e colar na plataforma onde gerenciamos tickets de desenvolvimento.
-```
-
-## ✅ Validação Rápida
-- Node (AJV): `npx ajv validate -s .ai_files/schemas/<schema>.json -d <data>.json`
-- Python: `python -c "import json,sys,jsonschema as j; j.validate(json.load(open(sys.argv[2])), json.load(open(sys.argv[1])))" .ai_files/schemas/<schema>.json <data>.json`
-
-## 🧩 Convenções
-- IDs: `integer` com `minimum: 1`, estáveis uma vez criados.
-- Tempos: `created_at` (UTC ISO 8601) imutável; `updated_at` (UTC) somente quando o conteúdo muda.
-- Respeite `$comment`: prepend, limites, resumos, imutabilidade.
-
-## 📜 Licença
-- Código e schemas: Apache-2.0 (veja `LICENSE`).
-- Documentação: você pode optar por CC BY 4.0 se separar a licença dos docs.
+- Código e schemas: Apache-2.0 (veja `LICENSE`)
+- Documentação: CC BY 4.0 (opcional)

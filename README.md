@@ -1,14 +1,22 @@
 <div align="center">
 
-# waves
+# Waves
 
 **[English](README.md) | [Español](README.es.md) | [Português](README.pt.md)**
 
+*The product development framework for the AI agent era*
+
 </div>
+
+## Why Waves
+
+Product development as we knew it has changed. AI agents (Claude Code, Codex, Gemini CLI) compress what used to take 6 months of development into days or weeks. 2-week sprints no longer reflect the actual rhythm of work — development is no longer the bottleneck.
+
+Waves replaces fixed-cadence sprints with **waves**: organic, variable-length delivery cycles where each wave carries a product increment from validation to production. A wave lasts as long as it needs — sometimes 3 days, sometimes 3 weeks. No artificial ceremonies, no arbitrary time boxes.
 
 ## What is it?
 
-waves is a structured protocol that guides AI agents through the **entire lifecycle of a product** — from the first idea to production code. It works with `Claude Code`, `Codex`, and `Gemini CLI` through interactive slash commands and structured JSON schemas.
+Waves is a structured protocol that guides AI agents through the **entire lifecycle of a product** — from the first idea to production code. It works with `Claude Code`, `Codex`, and `Gemini CLI` through interactive slash commands and structured JSON schemas.
 
 Instead of giving your AI agent a blank prompt and hoping for the best, waves walks it through a clear process: first understand if the idea is viable, then define what to build, then plan in what order, and finally write the code — with full context at every step.
 
