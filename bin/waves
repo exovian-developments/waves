@@ -73,10 +73,10 @@ get_data_dir() {
 
 show_banner() {
     echo ""
-    echo -e "${CYAN}▄▀█ █   █▄▄ █▀▀ █ █ ▄▀█ █ █ █ █▀█ █▀█${NC}"
-    echo -e "${CYAN}█▀█ █   █▄█ ██▄ █▀█ █▀█ ▀▄▀ █ █▄█ █▀▄${NC}"
+    echo -e "${CYAN}█ █ █ ▄▀█ █ █ █▀▀ █▀${NC}"
+    echo -e "${CYAN}▀▄▀▄▀ █▀█ ▀▄▀ ██▄ ▄█${NC}"
     echo ""
-    echo -e "${BOLD}« structured context for AI agents »${NC}"
+    echo -e "${BOLD}« product development for the AI era »${NC}"
     echo -e "  Claude · Codex · Gemini CLI"
     echo ""
 }
