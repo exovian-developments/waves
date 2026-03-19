@@ -10,9 +10,9 @@
 
 **Schema:** `ai_files/schemas/product_blueprint_schema.json`
 
-**Input:** `ai_files/product_foundation.json` (primary), `ai_files/*_feasibility.json` (optional deep-dive)
+**Input:** `ai_files/foundation.json` (primary), `ai_files/feasibility.json` (optional deep-dive)
 
-**Output:** `ai_files/product_blueprint.json`
+**Output:** `ai_files/blueprint.json`
 
 **Parameters:** `[product-name]` (optional — if not provided, taken from foundation)
 
@@ -51,10 +51,10 @@
 **STEP 0: Locate Foundation & Validate Readiness**
 **═══════════════════════════════════════════════════════════════════**
 
-3. Check if `ai_files/product_foundation.json` exists
+3. Check if `ai_files/foundation.json` exists
 
 4. IF NOT EXISTS:
-   - Check for `ai_files/*_feasibility.json`
+   - Check for `ai_files/feasibility.json`
    - IF feasibility exists:
      ```
      ⚠️ Product foundation not found!
@@ -82,7 +82,7 @@
      ```
    → **EXIT COMMAND**
 
-5. IF EXISTS: Read `product_foundation.json` completely into memory
+5. IF EXISTS: Read `foundation.json` completely into memory
 
 6. Check `blueprint_readiness.ready`:
    - IF `false`:
@@ -105,10 +105,10 @@
 
 7. Extract product name from foundation.meta.product_name (or use parameter)
 
-8. Check if `ai_files/product_blueprint.json` already exists:
+8. Check if `ai_files/blueprint.json` already exists:
    - IF EXISTS: Warn, ask overwrite/cancel
 
-9. Optionally load `ai_files/*_feasibility.json` for deeper context during generation (don't require, but use if available)
+9. Optionally load `ai_files/feasibility.json` for deeper context during generation (don't require, but use if available)
 
 ---
 
@@ -538,7 +538,7 @@
 
 63. Validate against schema
 
-64. Write to `ai_files/product_blueprint.json`
+64. Write to `ai_files/blueprint.json`
 
 ---
 
@@ -550,7 +550,7 @@
     ```
     ✅ Product Blueprint created!
 
-    📁 File: ai_files/product_blueprint.json
+    📁 File: ai_files/blueprint.json
 
     📊 Summary:
     • Product: [name] ([blueprint_type])
@@ -570,7 +570,7 @@
       The roadmap will use this blueprint to plan development phases.
 
     💡 Update the blueprint as the product evolves:
-      Edit ai_files/product_blueprint.json directly or
+      Edit ai_files/blueprint.json directly or
       use /waves:roadmap-update to record decisions that affect the blueprint.
     ```
 

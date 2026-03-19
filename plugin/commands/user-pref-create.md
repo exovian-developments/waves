@@ -323,23 +323,11 @@ If validation fails, show user the error and offer to re-do relevant section.
 
 **IF EXISTS:**
 - Read current content
-- If it doesn't already have a preferences reference, prepend this:
-```markdown
-# User Preferences
-
-Read and follow user preferences from: ai_files/user_pref.json
-
----
-
-```
+- If it doesn't already have the Waves framework training block (check for "Waves Framework — Agent Operating Protocol"), prepend the full Waves training block as defined in the `/waves:project-init` command. This includes the Agent Operating Protocol, directory structure, artifact hierarchy, required agent behaviors, wave lifecycle, and available commands.
+- If the block already exists but only has the old "User Preferences" header, replace it with the full Waves training block.
 
 **IF NOT EXISTS:**
-- Create new `CLAUDE.md` with:
-```markdown
-# User Preferences
-
-Read and follow user preferences from: ai_files/user_pref.json
-```
+- Create new `CLAUDE.md` with the full Waves framework training block as defined in `/waves:project-init`.
 
 ## Step 8: Success Message
 

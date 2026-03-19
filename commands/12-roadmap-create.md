@@ -10,14 +10,15 @@
 
 **Schema:** `ai_files/schemas/logbook_roadmap_schema.json`
 
-**Output:** `ai_files/roadmap_w[N].json` (wave convention: w0 = foundation, w1+ = business waves)
+**Output:** `ai_files/waves/[wave-name]/roadmap.json` (wave convention: sub-zero = feasibility/foundation setup, w0 = foundation, w1+ = business waves)
 
 **Parameters:** `[product-name]` (optional)
 
 **Wave Naming Convention:**
-- `roadmap_w0.json` — Foundation wave: agnostic capabilities not in any base project (e.g., phone auth with SMS/WhatsApp, new payment processor integration). Not specific to any business vertical.
-- `roadmap_w1.json`, `roadmap_w2.json`, etc. — Business waves: each delivers a cohesive set of vertical-specific capabilities.
-- The command auto-detects the next wave number by scanning existing `roadmap_w*.json` files.
+- `ai_files/waves/sub-zero/roadmap.json` — Sub-zero wave: initial feasibility and foundation setup when feasibility/foundation exist but no waves yet.
+- `ai_files/waves/w0/roadmap.json` — Foundation wave: agnostic capabilities not in any base project (e.g., phone auth with SMS/WhatsApp, new payment processor integration). Not specific to any business vertical.
+- `ai_files/waves/w1/roadmap.json`, `ai_files/waves/w2/roadmap.json`, etc. — Business waves: each delivers a cohesive set of vertical-specific capabilities.
+- The command auto-detects the next wave by listing `ai_files/waves/` directories.
 
 **Key Features:** Vision gathering, phase planning, milestone definition, checkpoint validation, context entry creation
 
@@ -74,14 +75,18 @@
      Or leave it empty and I'll guide you through the vision questions.
      ```
 
-6. **Wave number detection:**
-   - Scan `ai_files/` for existing `roadmap_w*.json` files
-   - If none exist → default to `w0` (foundation wave)
-   - If some exist → suggest next sequential wave number
-   - Ask user to confirm or override wave number
-   - Store as `wave_number`
-   - Check if `ai_files/roadmap_w[wave_number].json` already exists
-   - If exists → Warn: "Wave [N] roadmap already exists. Use /waves:roadmap-update instead"
+6. **Wave detection:**
+   - List `ai_files/waves/` directory to find existing wave directories
+   - If none exist AND feasibility/foundation files exist → suggest `sub-zero`
+   - If none exist AND no feasibility/foundation → default to `w0` (foundation wave)
+   - If `sub-zero` exists but no `w0` → suggest `w0`
+   - If `w0` exists but no `w1` → suggest `w1`
+   - If `wN` exists → suggest `w[N+1]` (increment from highest existing)
+   - Ask user to confirm or override wave name
+   - Store as `wave_name`
+   - Create directory `ai_files/waves/[wave_name]/` if it doesn't exist
+   - Check if `ai_files/waves/[wave_name]/roadmap.json` already exists
+   - If exists → Warn: "Wave [wave_name] roadmap already exists. Use /waves:roadmap-update instead"
 
 7. Continue to STEP 1
 
@@ -92,9 +97,9 @@
 **═══════════════════════════════════════════════════════════════════**
 
 6. MAIN AGENT: Check for existing project context files (in priority order):
-   - Check if `ai_files/product_blueprint.json` exists (richest context: capabilities, flows, rules, metrics)
-   - Check if `ai_files/product_foundation.json` exists (validated facts, financial benchmarks, SWOT)
-   - Check if `ai_files/*_feasibility.json` exists (raw research, Monte Carlo, Bayesian)
+   - Check if `ai_files/blueprint.json` exists (richest context: capabilities, flows, rules, metrics)
+   - Check if `ai_files/foundation.json` exists (validated facts, financial benchmarks, SWOT)
+   - Check if `ai_files/feasibility.json` exists (raw research, Monte Carlo, Bayesian)
    - Check if `ai_files/project_manifest.json` exists (software) or other manifest
    - Check if `ai_files/*_rules.json` exists (coding/project rules)
 
@@ -483,7 +488,7 @@
 
 43. SUBAGENT: Validate against `logbook_roadmap_schema.json`
 
-44. SUBAGENT: Write to `ai_files/roadmap_w[N].json` (where N is the wave_number from STEP 0)
+44. SUBAGENT: Write to `ai_files/waves/[wave_name]/roadmap.json` (where wave_name is from STEP 0)
 
 ---
 
@@ -496,7 +501,7 @@
     ✅ ¡Roadmap creado exitosamente!
 
     📁 Archivo generado:
-      • ai_files/roadmap_w[N].json
+      • ai_files/waves/[wave_name]/roadmap.json
 
     📊 Resumen del roadmap:
       • Producto: [product-name]
@@ -519,7 +524,7 @@
       decisiones y hallazgos durante la ejecución.
 
     💡 Tip: Actualiza el roadmap según progresa:
-      /waves:roadmap-update roadmap_w[N].json
+      /waves:roadmap-update [wave_name]
     ```
 
 ---

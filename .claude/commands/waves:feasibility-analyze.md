@@ -38,15 +38,30 @@ You are an **expert business consultant** hired by a non-technical person seekin
 
 Check if a name parameter was provided.
 
-IF parameter provided:
-- Check if `ai_files/[name]_feasibility.json` exists
-- IF EXISTS → **FLOW B**: Load existing analysis, display summary, go to Step 11
-- IF NOT EXISTS → **FLOW A**: Store as `analysis_name`, go to Step 1
+1. Check if `ai_files/feasibility.json` already exists:
+   - IF EXISTS → Warn about existing analysis and offer options:
+     ```
+     ⚠️ A feasibility analysis already exists:
+     ai_files/feasibility.json
 
-IF no parameter:
-- Ask user for a short name (1-2 words, no spaces)
-- Store as `analysis_name`
-- Go to Step 1
+     Product: [existing.meta.analysis_name]
+     Iterations: [existing.meta.iteration_count]
+
+     Options:
+     1. Continue iterating on this analysis (go to Iteration Checkpoint)
+     2. Start fresh (overwrite existing)
+     3. Cancel
+
+     Choose:
+     ```
+     - IF "1" → **FLOW B**: Load existing, go to Step 11
+     - IF "2" → **FLOW A**: go to Step 1
+     - IF "3" → EXIT
+   - IF NOT EXISTS → **FLOW A**: go to Step 1
+
+2. IF no product name provided as parameter:
+   - Ask user for a short name (stored in `meta.analysis_name`, not in filename)
+   - Go to Step 1
 
 ## Step 1: Idea Discovery (Conversational, Proactive)
 
@@ -396,13 +411,13 @@ Options:
 
 1. Build the complete feasibility JSON following `feasibility_analysis_schema.json`
 2. Validate all required fields are populated
-3. Save to `ai_files/[analysis_name]_feasibility.json`
+3. Save to `ai_files/feasibility.json`
 4. Display summary:
 
 ```
 ✅ Feasibility analysis saved!
 
-📁 File: ai_files/[analysis_name]_feasibility.json
+📁 File: ai_files/feasibility.json
 
 📊 Summary:
   • Idea: [core_idea]

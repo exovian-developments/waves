@@ -201,19 +201,24 @@ Apply timestamps to the roadmap JSON:
 - `created_at`: Current UTC timestamp (ISO 8601)
 - `last_updated`: Current UTC timestamp (ISO 8601)
 
-Construct filename using wave convention:
-- Scan `ai_files/` for existing `roadmap_w*.json` files
-- If none exist: use `w0` (foundation wave — agnostic capabilities)
-- If some exist: use next sequential wave number
-- Ask user to confirm wave number
+Construct output path using wave convention:
+- List `ai_files/waves/` directory to find existing wave directories
+- If none exist AND `ai_files/feasibility.json` or `ai_files/foundation.json` exist: suggest `sub-zero`
+- If none exist AND no feasibility/foundation: use `w0` (foundation wave — agnostic capabilities)
+- If `sub-zero` exists but no `w0`: suggest `w0`
+- If `w0` exists but no `w1`: suggest `w1`
+- If `wN` exists: suggest `w[N+1]` (increment from highest existing)
+- Ask user to confirm wave name
+- Create directory `ai_files/waves/[wave_name]/` if it doesn't exist
 
 ```
-ai_files/roadmap_w{N}.json
+ai_files/waves/[wave_name]/roadmap.json
 ```
 
-Example: `ai_files/roadmap_w0.json`, `ai_files/roadmap_w1.json`
+Example: `ai_files/waves/sub-zero/roadmap.json`, `ai_files/waves/w0/roadmap.json`, `ai_files/waves/w1/roadmap.json`
 
 Wave types:
+- sub-zero = Initial feasibility/foundation setup
 - w0 = Foundation — agnostic capabilities not in any base project
 - w1+ = Business waves — vertical-specific capabilities
 
@@ -226,7 +231,7 @@ Display:
 ```
 ✅ Roadmap created successfully!
 
-📄 File: ai_files/{filename}
+📄 File: ai_files/waves/{wave_name}/roadmap.json
 
 Next steps:
   • Use `roadmap-update` to track progress

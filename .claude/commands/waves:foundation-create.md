@@ -22,15 +22,13 @@ Check if `ai_files/user_pref.json` exists.
 
 ## Step 0: Locate Feasibility Analysis
 
-1. Scan `ai_files/` for `*_feasibility.json` files
-2. IF none found → EXIT: "No feasibility analysis found. Run /waves:feasibility-analyze first."
-3. IF one found → Auto-select it
-4. IF multiple found → List all with analysis_name, last_updated, iteration_count. Ask user to select.
-5. Read the selected feasibility file completely into memory
-6. Extract product name from `meta.analysis_name` (or use parameter if provided)
+1. Check if `ai_files/feasibility.json` exists
+2. IF NOT EXISTS → EXIT: "No feasibility analysis found. Run /waves:feasibility-analyze first."
+3. IF EXISTS → Read `ai_files/feasibility.json` completely into memory
+4. Extract product name from `meta.analysis_name` (or use parameter if provided)
 
 **Check for existing foundation:**
-- If `ai_files/product_foundation.json` exists:
+- If `ai_files/foundation.json` exists:
   - Show existing product name and source feasibility
   - Ask: "Overwrite? (Yes / No)"
   - If No → EXIT
@@ -231,14 +229,14 @@ For each unknown, assess:
    - `feasibility_confidence`: from feasibility
    - `feasibility_iteration_count`: from feasibility.meta.iteration_count
 4. Validate against schema
-5. Write to `ai_files/product_foundation.json`
+5. Write to `ai_files/foundation.json`
 
 ## Step 13: Summary
 
 ```
 ✅ Product Foundation created!
 
-📁 File: ai_files/product_foundation.json
+📁 File: ai_files/foundation.json
 
 📊 Summary:
 • Product: [name]

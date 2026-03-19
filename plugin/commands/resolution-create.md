@@ -38,17 +38,17 @@ You generate structured resolution documents from completed logbooks. Resolution
 
 IF `$ARGUMENTS` is provided:
 - Use it as the logbook filename.
-- Look in `ai_files/logbooks/` for the file.
+- Search in `ai_files/waves/*/logbooks/` for the file.
 - IF NOT FOUND → Show error with available logbooks.
 
 IF `$ARGUMENTS` is empty:
-- List available logbooks in `ai_files/logbooks/`:
+- List available logbooks from `ai_files/waves/*/logbooks/`:
 
 ```
 📚 Available logbooks:
 
-[For each .json file]:
-  [number]. [filename] (last modified: [date])
+[For each .json file, showing which wave it belongs to]:
+  [number]. [wave]/[filename] (last modified: [date])
 
 Choose a logbook:
 ```
@@ -143,16 +143,17 @@ IF "Edit" → Let user provide modifications, apply edits, regenerate preview.
 
 ## Step 4: Save File
 
-1. Create directory if needed: `ai_files/resolutions/`
-2. Save as: `ai_files/resolutions/[logbook-name]-resolution.md`
-   - Example: logbook `auth-implementation.json` → `auth-implementation-resolution.md`
+1. Derive the wave from the logbook's path (e.g., if logbook is at `ai_files/waves/w1/logbooks/auth-implementation.json`, the wave is `w1`). Do not ask the user — infer automatically.
+2. Create directory if needed: `ai_files/waves/[wN]/resolutions/`
+3. Save as: `ai_files/waves/[wN]/resolutions/[logbook-name]-resolution.md`
+   - Example: logbook at `ai_files/waves/w1/logbooks/auth-implementation.json` → `ai_files/waves/w1/resolutions/auth-implementation-resolution.md`
 
 ## Step 5: Success Message
 
 ```
 ✅ Resolution created!
 
-📁 File: ai_files/resolutions/[filename]
+📁 File: ai_files/waves/[wN]/resolutions/[filename]
 
 📊 Summary:
   • Objectives completed: [count]

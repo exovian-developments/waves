@@ -202,7 +202,7 @@
         "id": 3,
         "name": "Logbook creation and work tracking",
         "entry_point": "User runs /waves:logbook-create TICKET-123.json.",
-        "termination": "Logbook file exists in ai_files/logbooks/ with objectives, scope, and completion guides.",
+        "termination": "Logbook file exists in ai_files/waves/[wN]/logbooks/ with objectives, scope, and completion guides.",
         "description": "User describes the ticket. The command traces code references using the manifest, proposes main objectives with scope (files + rules), dispatches secondary-objective-generator subagent for completion guides. User validates at 3 checkpoints: analysis, main objectives, secondary objectives. Final logbook is written.",
         "capability_refs": [4]
       },
@@ -237,7 +237,7 @@
         "name": "Context auto-loading at session start",
         "trigger": "AI agent session begins in a project with ai_files/ directory and CLAUDE.md references.",
         "result": "Agent has global context (manifest, rules, preferences) loaded before the user issues any command.",
-        "description": "CLAUDE.md contains required_reading entries pointing to ai_files/. The agent reads user_pref.json (language, tone), project_manifest.json (architecture), and project_rules.json (constraints) on session start. In the plugin variant, a SessionStart hook automates this."
+        "description": "CLAUDE.md contains the Waves Framework Agent Operating Protocol injected by project-init. This trains the agent to: read blueprint.json before any task, check for active roadmaps in waves/, alert on missing artifacts, and follow the Waves order (Sub-Zero → W0 → W1+). The agent also loads user_pref.json (language, tone), project_manifest.json (architecture), and project_rules.json (constraints) on session start. In the plugin variant, a SessionStart hook automates this."
       },
       {
         "id": 2,
@@ -427,6 +427,13 @@
       "decision": "Rebrand from ai-behavior to Waves — reflecting a shift from technical protocol identity to product-market identity built around wave-based delivery cycles for AI-era development.",
       "context": "AI agents have compressed development timelines from months to days. Fixed-cadence frameworks (Scrum sprints, SAFe PIs) no longer match the natural rhythm of AI-assisted work. The wave metaphor captures organic, variable-length delivery cycles where each wave carries a complete increment from validation to production. The rename also makes the product more commercially accessible — 'ai-behavior' sounded like a library, 'Waves' sounds like a framework with a point of view. Full rename: repo, CLI, commands prefix, Homebrew formula, plugin identity.",
       "impact_on": "All external-facing identity: repo name, CLI binary, command prefix /waves:*, Homebrew formula, plugin, documentation"
+    },
+    {
+      "id": 6,
+      "created_at": "2026-03-18T00:00:00Z",
+      "decision": "Restructure ai_files/ from flat layout to wave-based directory hierarchy: product artifacts (blueprint.json, foundation.json, feasibility.json) at root, delivery artifacts nested under waves/[wave_name]/ (roadmap.json, logbooks/, resolutions/). Rename product_blueprint.json → blueprint.json, product_foundation.json → foundation.json, *_feasibility.json → feasibility.json (one per project).",
+      "context": "The flat structure (all files in ai_files/ root, logbooks in ai_files/logbooks/) made it impossible for agents to associate logbooks with their parent roadmap when multiple waves coexist. Cross-project roadmaps (like exovian_platform) had logbook_ref pointing to absolute filesystem paths instead of portable references. The new structure mirrors the artifact hierarchy physically: blueprint at root (product-level), waves/ contains sub-zero/, w0/, w1/...wN/ each with its own roadmap.json + logbooks/ + resolutions/. This means: (1) logbook-create auto-detects the active wave from its roadmap status, (2) resolution-create derives the output path from the logbook's location, (3) ECC can traverse waves/ to calculate per-wave and global progress, (4) logbook_ref uses portable format org/repo::waves/wN/logbooks/file.json. Discarded: multi-product nesting under products/[slug]/ (one product per repo is the standard).",
+      "impact_on": "All commands that read/write artifacts, SKILL.md, project-init CLAUDE.md injection, ECC artifact navigation and progress calculation, cross-project roadmap references"
     }
   ],
 

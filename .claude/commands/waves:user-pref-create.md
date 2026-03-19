@@ -120,9 +120,9 @@ IF "Edit [section]" → return to that section.
 
 ## Step 7: Update CLAUDE.md
 
-Same logic as project-init:
-- IF `CLAUDE.md` exists → Prepend preferences reference.
-- IF NOT → Create with preferences reference.
+Same logic as `/waves:project-init`:
+- IF `CLAUDE.md` exists → Check if the Waves framework training block already exists (look for "Waves Framework — Agent Operating Protocol"). If not present, prepend the full Waves training block (Agent Operating Protocol, directory structure, artifact hierarchy, required agent behaviors, wave lifecycle, and available commands). If only the old "User Preferences" header exists, replace it with the full block.
+- IF NOT → Create `CLAUDE.md` with the full Waves framework training block as defined in `/waves:project-init`.
 
 ## Step 8: Success Message
 

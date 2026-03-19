@@ -12,7 +12,7 @@
 - Software → `ai_files/schemas/logbook_software_schema.json`
 - General → `ai_files/schemas/logbook_general_schema.json`
 
-**Input/Output:** `ai_files/logbooks/[filename].json`
+**Input/Output:** `ai_files/waves/[wave_name]/logbooks/[filename].json`
 
 **Parameters:** `[filename]` (optional) - Name of the logbook to update
 
@@ -66,9 +66,9 @@
 4. MAIN AGENT: Check if filename parameter provided
 
 5. IF parameter provided:
-   - Validate file exists: `ai_files/logbooks/[filename].json`
+   - Search for file in `ai_files/waves/*/logbooks/[filename].json`
    - IF NOT EXISTS → Error: "Bitácora no encontrada: [filename]"
-   - IF EXISTS → Load logbook, continue
+   - IF EXISTS → Load logbook, note which wave it belongs to, continue
 
 6. IF NO parameter:
    - Show tip:
@@ -76,12 +76,15 @@
      💡 TIP: Puedes ejecutar más rápido con:
         /waves:logbook-update MT-572.json
      ```
-   - List available logbooks:
+   - List available logbooks from all waves `ai_files/waves/*/logbooks/*.json`:
      ```
      📚 Bitácoras disponibles:
 
+     Wave w1:
      1. MT-572.json (actualizado hace 2 horas)
      2. feature-auth.json (actualizado hace 1 día)
+
+     Wave w0:
      3. bug-fix-login.json (actualizado hace 3 días)
 
      Elige 1-3 o escribe el nombre:
@@ -556,13 +559,13 @@
     - IF `project_type === "software"` → Validate against `logbook_software_schema.json`
     - IF `project_type === "general"` → Validate against `logbook_general_schema.json`
 
-65. MAIN AGENT: Save to `ai_files/logbooks/[filename].json`
+65. MAIN AGENT: Save to `ai_files/waves/[wave_name]/logbooks/[filename].json`
 
 66. MAIN AGENT: Show summary
     ```
     ✅ Bitácora actualizada!
 
-    📁 Archivo: ai_files/logbooks/[filename].json
+    📁 Archivo: ai_files/waves/[wave_name]/logbooks/[filename].json
 
     📊 Cambios realizados:
     • Entradas de contexto agregadas: [count]

@@ -45,15 +45,27 @@ IF parameter provided:
 - Validate filename format (must end in `.json`, no special chars except `-` and `_`)
 - Store as `logbook_filename`
 
+## Step 0.5: Smart Wave Detection
+
+Before checking for existing logbooks, determine the target wave:
+
+1. List `ai_files/waves/*/roadmap.json` to find all waves with roadmaps
+2. Read each roadmap — find which has status "active" or "in_progress"
+3. If only ONE wave is active → use that wave automatically
+4. If the user provided context (ticket description, milestone name) that matches a specific milestone in a roadmap → use that wave
+5. Only ask the user if genuinely ambiguous (multiple active waves, no clear match)
+6. Store as `target_wave`
+7. Create directory `ai_files/waves/[target_wave]/logbooks/` if it doesn't exist
+
 ## Step 1: Check Existing Logbook
 
-If filename was provided, check if `ai_files/logbooks/[filename].json` exists.
+If filename was provided, check if `ai_files/waves/[target_wave]/logbooks/[filename].json` exists.
 
 IF EXISTS:
 ```
 ⚠️ A logbook with that name already exists!
 
-File: ai_files/logbooks/[filename].json
+File: ai_files/waves/[target_wave]/logbooks/[filename].json
 
 Options:
 1. Use different name
@@ -313,16 +325,16 @@ Validate the generated logbook against the appropriate schema.
 
 ## Save File
 
-Save to `ai_files/logbooks/[filename].json`
+Save to `ai_files/waves/[target_wave]/logbooks/[filename].json`
 
-Ensure `ai_files/logbooks/` directory exists.
+Ensure `ai_files/waves/[target_wave]/logbooks/` directory exists.
 
 ## Success Message
 
 ```
 ✅ Logbook created successfully!
 
-📁 File: ai_files/logbooks/[filename].json
+📁 File: ai_files/waves/[target_wave]/logbooks/[filename].json
 
 📊 Summary:
 • Ticket: [title]

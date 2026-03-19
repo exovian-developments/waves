@@ -12,7 +12,7 @@
 - Software → `ai_files/schemas/logbook_software_schema.json`
 - General → `ai_files/schemas/logbook_general_schema.json`
 
-**Output:** `ai_files/logbooks/[filename].json`
+**Output:** `ai_files/waves/[wave_name]/logbooks/[filename].json`
 
 **Parameters:** `[filename]` (optional) - Name for the logbook file
 
@@ -80,13 +80,22 @@
 **STEP 1: Check Existing Logbook**
 **═══════════════════════════════════════════════════════════════════**
 
-7. MAIN AGENT: Check if `ai_files/logbooks/[filename].json` exists
+7. MAIN AGENT: Determine target wave using smart wave detection:
+   a. List `ai_files/waves/*/roadmap.json` to find all waves with roadmaps
+   b. Read each roadmap — find which has status "active" or "in_progress"
+   c. If only ONE wave is active → use that wave automatically
+   d. If the user provided context (ticket description, milestone name) that matches a specific milestone in a roadmap → use that wave
+   e. Only ask the user if genuinely ambiguous (multiple active waves, no clear match)
+   f. Store as `target_wave`
+   g. Create directory `ai_files/waves/[target_wave]/logbooks/` if it doesn't exist
 
-8. IF EXISTS → MAIN AGENT:
+8. MAIN AGENT: Check if `ai_files/waves/[target_wave]/logbooks/[filename].json` exists
+
+9. IF EXISTS → MAIN AGENT:
    ```
    ⚠️ Ya existe una bitácora con ese nombre!
 
-   Archivo: ai_files/logbooks/[filename].json
+   Archivo: ai_files/waves/[target_wave]/logbooks/[filename].json
 
    Opciones:
    1. Usar otro nombre
@@ -182,10 +191,10 @@
     - Note rule IDs for scope.rules
 
 24. MAIN AGENT: Search for product-level context files:
-    - `ai_files/product_blueprint.json` → IF EXISTS: Extract relevant capabilities, flows, design principles, product rules
+    - `ai_files/blueprint.json` → IF EXISTS: Extract relevant capabilities, flows, design principles, product rules
     - `ai_files/technical_guide.md` → IF EXISTS: Extract relevant technical guidelines, architecture decisions
-    - `ai_files/*_feasibility.json` → IF EXISTS: Extract relevant revenue context, buyer personas, essential capabilities
-    - Roadmap files: `ai_files/roadmap_w*.json` (wave convention) and `ai_files/*_roadmap.json` (legacy) → IF ANY EXIST: Extract current phase, milestones, relevant decisions
+    - `ai_files/feasibility.json` → IF EXISTS: Extract relevant revenue context, buyer personas, essential capabilities
+    - Roadmap files: `ai_files/waves/*/roadmap.json` → IF ANY EXIST: Extract current phase, milestones, relevant decisions
     - For each file found: Extract only sections relevant to the ticket. Store as `product_context`.
     - For each file NOT found: Note in report but DO NOT stop. Continue normally.
 
@@ -473,7 +482,7 @@ The agent resolves ALL design decisions autonomously. It only escalates to the u
     - IF `project_type === "software"` → Validate against `logbook_software_schema.json`
     - IF `project_type === "general"` → Validate against `logbook_general_schema.json`
 
-49. MAIN AGENT: Save to `ai_files/logbooks/[filename].json`
+49. MAIN AGENT: Save to `ai_files/waves/[target_wave]/logbooks/[filename].json`
 
 50. MAIN AGENT: Create initial recent_context entry:
     ```json
@@ -492,7 +501,7 @@ The agent resolves ALL design decisions autonomously. It only escalates to the u
     ```
     ✅ ¡Bitácora creada exitosamente!
 
-    📁 Archivo: ai_files/logbooks/[filename].json
+    📁 Archivo: ai_files/waves/[target_wave]/logbooks/[filename].json
 
     📊 Resumen:
     • Ticket: [title]

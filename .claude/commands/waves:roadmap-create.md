@@ -21,39 +21,44 @@ Check if `ai_files/user_pref.json` exists.
 - If product-name parameter is provided: Use it as the product name for the roadmap metadata
 - If not provided: Show tip: "Tip: Run `/waves:roadmap-create my-product` to name the roadmap. Running without a name will prompt you."
 
-**Wave number detection:**
-- Scan `ai_files/` for existing `roadmap_w*.json` files
-- If none exist: Default to `w0` (foundation wave — agnostic capabilities)
-- If some exist: Suggest next wave number (e.g., if `roadmap_w0.json` and `roadmap_w1.json` exist, suggest `w2`)
+**Wave detection:**
+- List `ai_files/waves/` directory to find existing wave directories
+- If none exist AND `ai_files/feasibility.json` or `ai_files/foundation.json` exist: Suggest `sub-zero`
+- If none exist AND no feasibility/foundation: Default to `w0` (foundation wave — agnostic capabilities)
+- If `sub-zero` exists but no `w0`: Suggest `w0`
+- If `w0` exists but no `w1`: Suggest `w1`
+- If `wN` exists: Suggest `w[N+1]` (increment from highest existing)
 - Ask user to confirm or override:
   ```
-  📋 Wave number for this roadmap:
+  📋 Wave for this roadmap:
 
   Existing waves found: [list or "none"]
-  Suggested: w[N]
+  Suggested: [wave_name]
 
   Wave types:
+  • sub-zero = Initial feasibility/foundation setup
   • w0 = Foundation — agnostic capabilities not in any base project
     (e.g., phone auth with SMS/WhatsApp, new payment processor)
   • w1+ = Business waves — vertical-specific capabilities
 
-  Use w[N]? (Enter to confirm, or type different number)
+  Use [wave_name]? (Enter to confirm, or type different name)
   ```
-- Store as `wave_number`
+- Store as `wave_name`
+- Create directory `ai_files/waves/[wave_name]/` if it doesn't exist
 - Continue with user interaction in preferred_language
 
 ## Step 1: Detect Context
 
 Check for existing files in `ai_files/`:
-- `product_blueprint.json` (product blueprint — richest context)
-- `product_foundation.json` (product foundation — validated facts)
-- `*_feasibility.json` (feasibility analysis — raw research)
+- `blueprint.json` (product blueprint — richest context)
+- `foundation.json` (product foundation — validated facts)
+- `feasibility.json` (feasibility analysis — raw research)
 - `project_manifest.json` (project manifest — technical context)
 - `project_rules.json` (project rules)
 
 Based on findings:
-- If product_blueprint.json exists → Flow A (richest context: blueprint has capabilities, flows, design principles, success metrics)
-- If product_foundation.json exists (no blueprint) → Flow A (good context: foundation has validated capabilities, financial benchmarks, SWOT)
+- If blueprint.json exists → Flow A (richest context: blueprint has capabilities, flows, design principles, success metrics)
+- If foundation.json exists (no blueprint) → Flow A (good context: foundation has validated capabilities, financial benchmarks, SWOT)
 - If manifest exists (no blueprint/foundation) → Flow A (basic context: technical stack and architecture)
 - If none of the above → Flow B (from scratch)
 
@@ -123,15 +128,17 @@ Iterate until user confirms.
   - `recent_context`: initial entry: "Roadmap created with [X] phases and [Y] milestones. Vision: [summary]"
   - `history_summary`: empty array
 
-- Write JSON to `ai_files/roadmap_w[N].json` (where N is the wave_number from Step 0)
-  - Example: `ai_files/roadmap_w0.json`, `ai_files/roadmap_w1.json`
+- Write JSON to `ai_files/waves/[wave_name]/roadmap.json` (where wave_name is from Step 0)
+  - Create directory `ai_files/waves/[wave_name]/` if it doesn't exist
+  - Example: `ai_files/waves/sub-zero/roadmap.json`, `ai_files/waves/w0/roadmap.json`, `ai_files/waves/w1/roadmap.json`
 
 ## Step 6: Summary
 
-- Confirm file creation with path: `ai_files/roadmap_w[N].json`
-- Show overview: "[X] phases, [Y] total milestones, status: planning, wave: w[N]"
+- Confirm file creation with path: `ai_files/waves/[wave_name]/roadmap.json`
+- Show overview: "[X] phases, [Y] total milestones, status: planning, wave: [wave_name]"
 - Explain wave context:
+  - If sub-zero: "This is the sub-zero wave — initial feasibility and foundation setup."
   - If w0: "This is a foundation wave — agnostic capabilities not tied to any specific business vertical."
   - If w1+: "This is business wave [N] — vertical-specific capabilities."
 - Suggest next step: "Ready to start? Run `/waves:logbook-create [product-name]` to create your first milestone logbook."
-- Suggest future waves: "When you're ready for the next wave, run `/waves:roadmap-create [product-name]` again — it will auto-detect the next wave number."
+- Suggest future waves: "When you're ready for the next wave, run `/waves:roadmap-create [product-name]` again — it will auto-detect the next wave."

@@ -188,18 +188,115 @@ Create `ai_files/user_pref.json` with:
 Check if `CLAUDE.md` exists in project root.
 
 IF EXISTS:
-- Prepend this content at the top:
+- Read current contents
+- Prepend the following Waves framework training block at the top (before existing content):
+
 ```markdown
-# User Preferences
+# Waves Framework — Agent Operating Protocol
+
+This project uses the **Waves** product development framework. As an AI agent, you MUST follow these guidelines:
+
+## User Preferences
 
 Read and follow user preferences from: ai_files/user_pref.json
+
+## Directory Structure
+
+All Waves artifacts live in `ai_files/`:
+
+ai_files/
+├── user_pref.json              ← User preferences (language, style)
+├── project_manifest.json       ← Technical project analysis
+├── project_rules.json          ← Coding rules and standards
+├── schemas/                    ← JSON schemas for validation
+│
+├── feasibility.json            ← Market/technical feasibility (Sub-Zero)
+├── foundation.json             ← Validated facts from feasibility (Sub-Zero)
+├── blueprint.json              ← Product definition: WHAT and WHY (W0)
+│
+└── waves/                      ← Delivery cycles
+    ├── sub-zero/               ← Validation / Knowledge acquisition
+    │   ├── roadmap.json
+    │   └── logbooks/
+    ├── w0/                     ← Product definition
+    │   ├── roadmap.json
+    │   └── logbooks/
+    ├── w1/                     ← Business wave 1
+    │   ├── roadmap.json        ← WHEN and ORDER for this wave
+    │   ├── logbooks/           ← HOW and DETAIL (per ticket)
+    │   └── resolutions/        ← Completed logbook summaries
+    └── wN/                     ← Subsequent business waves
+        ├── roadmap.json
+        ├── logbooks/
+        └── resolutions/
+
+## Artifact Hierarchy (Golden Rule)
+
+blueprint.json              ← WHAT / WHY (source of truth)
+  └── waves/wN/roadmap.json ← WHEN / ORDER (wave plan)
+       └── logbooks/*.json  ← HOW / DETAIL (ticket execution)
+
+**Nothing exists in the project that is not supported in the blueprint.** Every roadmap references the blueprint. Every logbook belongs to a roadmap.
+
+## Required Agent Behaviors
+
+1. **Before starting any task**, read `ai_files/blueprint.json` to understand the product context. If no blueprint exists, ALERT the user: "No product blueprint found. Consider running /waves:blueprint-create to define the product before implementation."
+
+2. **Before implementing code**, check for an active roadmap in `ai_files/waves/`. If no roadmap exists, ALERT the user: "No active roadmap found. Consider running /waves:roadmap-create to plan the wave."
+
+3. **When given a task**, check if a logbook exists for it in the active wave's `logbooks/` directory. If not, RECOMMEND: "No logbook found for this task. Consider running /waves:logbook-create to track objectives and context."
+
+4. **Reference artifacts in responses**. When discussing features, mention which capability from the blueprint they support. When reporting progress, reference the roadmap milestone.
+
+5. **Follow the Waves order**:
+   - Sub-Zero: feasibility → foundation (validate the idea)
+   - W0: blueprint → roadmap → project setup (define the product)
+   - W1+: logbook → implement → update logbook → resolution (deliver value)
+
+6. **Alert on missing artifacts**:
+   - No blueprint → "The product is not defined yet"
+   - No roadmap → "There's no plan for the current wave"
+   - No logbook for current task → "This task isn't being tracked"
+   - Logbook can't trace to blueprint → "This work may not be aligned with the product"
+
+7. **When artifacts exist, USE them**:
+   - Read `project_rules.json` before writing code
+   - Read the active roadmap to understand priorities
+   - Read relevant logbooks for implementation context
+   - Read `project_manifest.json` for architecture context
+
+## Wave Lifecycle
+
+Waves are organic delivery cycles (not fixed sprints). A wave lasts as long as needed.
+
+| Wave | Purpose | Key artifacts |
+|------|---------|---------------|
+| Sub-Zero | Validate the idea | feasibility.json, foundation.json |
+| W0 | Define the product | blueprint.json, roadmap for W1 |
+| W1+ | Deliver to production | roadmaps, logbooks, resolutions |
+
+## Waves Commands Available
+
+- `/waves:feasibility-analyze` — Market/technical feasibility analysis
+- `/waves:foundation-create` — Compact feasibility into validated facts
+- `/waves:blueprint-create` — Define the product (WHAT and WHY)
+- `/waves:roadmap-create` — Plan a wave (WHEN and ORDER)
+- `/waves:logbook-create` — Create implementation logbook (HOW)
+- `/waves:logbook-update` — Update logbook with progress
+- `/waves:objectives-implement` — Execute logbook objectives
+- `/waves:roadmap-update` — Update roadmap with progress/decisions
+- `/waves:resolution-create` — Generate completion summary
+- `/waves:manifest-create` — Analyze project technically
+- `/waves:rules-create` — Extract coding standards
 
 ---
 
 ```
 
+Then append the original CLAUDE.md content below the `---`.
+
 IF NOT EXISTS:
-- Create `CLAUDE.md` with just the preferences reference.
+- Create `CLAUDE.md` with the same Waves framework training block above (without the trailing `---`).
 
 ## Step 11: Success Message
 

@@ -11,7 +11,7 @@ You are executing the implementation command. Follow these instructions exactly.
 
 You are the orchestrator AND executor for code implementation with compliance verification. You will:
 1. Help user select a logbook and starting objective
-2. Load business context from product_blueprint to understand WHAT the business needs
+2. Load business context from blueprint to understand WHAT the business needs
 3. Implement code directly (no subagents), aligned with both technical rules and business intent
 4. Audit compliance with project rules directly (no subagents)
 5. Update the logbook immediately after each objective (status + recent_context)
@@ -19,7 +19,7 @@ You are the orchestrator AND executor for code implementation with compliance ve
 
 **CONTINUOUS EXECUTION:** Once the user selects a logbook and starting point, the agent implements objectives in sequence without stopping for approval. It only stops when: context window ≤ 7%, all objectives done, or a blocking impediment is found.
 
-**BUSINESS AWARENESS:** The agent reads the product_blueprint to understand which capability, flow, or view each objective serves. Essential capabilities get extra thoroughness. Business-impact findings are recorded in recent_context for cross-session continuity.
+**BUSINESS AWARENESS:** The agent reads the blueprint to understand which capability, flow, or view each objective serves. Essential capabilities get extra thoroughness. Business-impact findings are recorded in recent_context for cross-session continuity.
 
 **IMPORTANT: Do NOT delegate implementation or auditing to subagents. Execute all steps directly in the main agent to preserve full context (project rules, manifest, resolved decisions, prior objectives, business context). Subagents lose accumulated context and can produce code that contradicts project conventions.**
 
@@ -65,7 +65,7 @@ IF no parameter:
 
 ### Step 1.1: Validate Provided Logbook
 
-Check if `ai_files/logbooks/[logbook_param]` exists.
+Search for `[logbook_param]` in `ai_files/waves/*/logbooks/`.
 
 IF EXISTS:
 - Load the logbook
@@ -79,11 +79,11 @@ IF NOT EXISTS:
 
 ### Step 1.2: List Available Logbooks
 
-Scan `ai_files/logbooks/` directory for `.json` files.
+Scan `ai_files/waves/*/logbooks/` directories for `.json` files.
 
-**IF directory empty or no logbooks:**
+**IF no logbooks found:**
 ```
-📂 No logbooks found in ai_files/logbooks/
+📂 No logbooks found in ai_files/waves/*/logbooks/
 
 A logbook defines your task objectives and guides implementation.
 
@@ -97,16 +97,16 @@ Example:
 
 **IF logbooks exist:**
 
-Display available logbooks with status summary:
+Display available logbooks with status summary, showing which wave each belongs to:
 
 ```
 📚 Available logbooks:
 
-  #  Logbook                    Last Modified    Objectives
-  ─────────────────────────────────────────────────────────────────
-  1  TICKET-123.json            2 hours ago      3 main (1 active)
-  2  feature-auth.json          1 day ago        2 main (2 pending)
-  3  bug-fix-login.json         3 days ago       1 main (✅ done)
+  #  Wave  Logbook                    Last Modified    Objectives
+  ──────────────────────────────────────────────────────────────────────────
+  1  w1    TICKET-123.json            2 hours ago      3 main (1 active)
+  2  w1    feature-auth.json          1 day ago        2 main (2 pending)
+  3  w2    bug-fix-login.json         3 days ago       1 main (✅ done)
 
 Options:
   [1-N]  Select by number
@@ -127,7 +127,7 @@ Load the selected logbook and display:
 
 ```
 📋 Logbook: [ticket.title]
-   File: ai_files/logbooks/[filename]
+   File: ai_files/waves/[wN]/logbooks/[filename]
 
 🎯 Main Objectives:
 ┌────┬────────────────────────────────────────────────┬─────────────┐
@@ -205,7 +205,7 @@ Display:
    - If no rules file, set `applicable_rules = []`
 
 3. **Load product blueprint (CRITICAL for business alignment):**
-   - Search for `ai_files/product_blueprint.json`
+   - Search for `ai_files/blueprint.json`
    - IF EXISTS:
      - Identify which **capability**, **user_flow**, **system_flow**, or **view** relates to the current objective
      - Extract: description, $comment, is_essential flag, acceptance_criteria, related design_principles and product_rules
@@ -216,8 +216,8 @@ Display:
 
 4. **Load additional product context files:**
    - Search for `ai_files/technical_guide.md` → Extract relevant sections
-   - Search for `ai_files/*_feasibility.json` → Extract relevant context
-   - Search for roadmap files: `ai_files/roadmap_w*.json` (wave convention) and `ai_files/*_roadmap.json` (legacy) → Extract current phase context from the most relevant roadmap
+   - Search for `ai_files/feasibility.json` → Extract relevant context
+   - Search for roadmap files: `ai_files/waves/*/roadmap.json` → Extract current phase context from the most relevant roadmap
    - For each file NOT found: Skip silently.
 
 5. **Parse completion guide:**
@@ -440,7 +440,7 @@ For each category in implementation_findings, create context entries:
 **For each finding that could affect a business capability, insert a dedicated recent_context entry.** These entries persist across sessions.
 
 **Insert a business-impact entry when:**
-- A code change affects the behavior of a capability from the product_blueprint
+- A code change affects the behavior of a capability from the blueprint
 - A dependency was upgraded/added that could affect system stability
 - An architecture pattern was deviated from, creating a new precedent
 - A bug or edge case was discovered that could affect user-facing behavior
@@ -546,7 +546,7 @@ Save the updated logbook.
   • Business-impact entries: [count]
   • Stop reason: [all done | context limit | impediment]
 
-📋 Logbook: ai_files/logbooks/[filename]
+📋 Logbook: ai_files/waves/[wN]/logbooks/[filename]
 
 [If objectives remain:]
 🎯 Next pending: [next_objective.id]: [content]

@@ -10,7 +10,7 @@ You are executing the waves logbook creation command. Follow these instructions 
 
 You are the main orchestrator for logbook creation. You will gather task information, detect UI requirements, analyze related code, resolve ALL design decisions autonomously using SRP/KISS/YAGNI/DRY/SOLID principles, and create a structured logbook with main and secondary objectives.
 
-**Autonomy principle:** You are trusted to make high-quality design decisions when you have clear business context (product_blueprint, ticket description, project rules) and established architecture. You only escalate to the user when detecting business-level contradictions that design principles cannot resolve.
+**Autonomy principle:** You are trusted to make high-quality design decisions when you have clear business context (blueprint, ticket description, project rules) and established architecture. You only escalate to the user when detecting business-level contradictions that design principles cannot resolve.
 
 ## Step -1: Prerequisites Check (CRITICAL)
 
@@ -51,15 +51,27 @@ IF parameter provided:
 - No special characters except `-` and `_`
 - IF invalid → Ask for valid filename
 
+## Step 0.5: Smart Wave Detection (CRITICAL)
+
+Before checking for existing logbooks, determine the target wave. DO NOT ask the user if context is clear:
+
+1. List `ai_files/waves/*/roadmap.json` to find all waves with roadmaps
+2. Read each roadmap — find which has status "active" or "in_progress"
+3. If only ONE wave is active → use that wave automatically
+4. If the user provided context (ticket description, milestone name) that matches a specific milestone in a roadmap → use that wave
+5. Only ask the user if genuinely ambiguous (multiple active waves, no clear match)
+6. Store as `target_wave`
+7. Create directory `ai_files/waves/[target_wave]/logbooks/` if it doesn't exist
+
 ## Step 1: Check Existing Logbook
 
-Check if `ai_files/logbooks/[filename].json` exists (if filename was provided).
+Check if `ai_files/waves/[target_wave]/logbooks/[filename].json` exists (if filename was provided).
 
 IF EXISTS:
 ```
 ⚠️ A logbook with that name already exists!
 
-File: ai_files/logbooks/[filename].json
+File: ai_files/waves/[target_wave]/logbooks/[filename].json
 
 Options:
 1. Use different name
@@ -229,10 +241,10 @@ Uses schema: `ai_files/schemas/logbook_software_schema.json`
    - Note rule IDs for `scope.rules`
 
 4. **Search for product-level context files:**
-   - Search for `ai_files/product_blueprint.json` → IF EXISTS: Read and extract relevant capabilities, flows, design principles, and product rules that relate to the ticket
+   - Search for `ai_files/blueprint.json` → IF EXISTS: Read and extract relevant capabilities, flows, design principles, and product rules that relate to the ticket
    - Search for `ai_files/technical_guide.md` → IF EXISTS: Read and extract relevant technical guidelines, architecture decisions, and implementation patterns
-   - Search for `ai_files/*_feasibility.json` → IF EXISTS: Read and extract relevant revenue model context, buyer personas, and essential capabilities
-   - Search for roadmap files: `ai_files/roadmap_w*.json` (wave convention) and `ai_files/*_roadmap.json` (legacy) → IF ANY EXIST: Read and extract current phase, milestones, and relevant decisions. If multiple roadmaps found, prioritize the one with the highest wave number (latest wave) or the one most relevant to the ticket.
+   - Search for `ai_files/feasibility.json` → IF EXISTS: Read and extract relevant revenue model context, buyer personas, and essential capabilities
+   - Search for roadmap files: `ai_files/waves/*/roadmap.json` → IF ANY EXIST: Read and extract current phase, milestones, and relevant decisions. If multiple roadmaps found, prioritize the one for the target wave or the one most relevant to the ticket.
 
    **For each file found:** Extract only the sections relevant to the ticket description. Store as `product_context`.
 
@@ -307,7 +319,7 @@ Store all additional sources for inclusion in logbook context and completion gui
 
 ## Step A2: Autonomous Design Resolution (CRITICAL)
 
-Before generating objectives, identify and resolve ALL design decisions autonomously. The agent is trusted to make high-quality design decisions when it has clear business context (product_blueprint, ticket description, project rules) and applies established principles.
+Before generating objectives, identify and resolve ALL design decisions autonomously. The agent is trusted to make high-quality design decisions when it has clear business context (blueprint, ticket description, project rules) and applies established principles.
 
 **Philosophy:** The agent resolves ALL code-level and architecture-level decisions autonomously. It only escalates to the user when detecting **business-level** contradictions, ambiguities, or incongruencies that design principles cannot resolve.
 
@@ -345,7 +357,7 @@ For each decision, the agent selects the principle(s) most relevant and resolves
 After resolving all code/architecture decisions, check if any remaining issues are **business-level**:
 
 **Escalate ONLY when:**
-- The ticket description contradicts the product_blueprint (e.g., ticket asks to remove a capability the blueprint marks as revenue_blocking)
+- The ticket description contradicts the blueprint (e.g., ticket asks to remove a capability the blueprint marks as revenue_blocking)
 - Acceptance criteria are mutually exclusive or logically impossible
 - The ticket scope is fundamentally ambiguous about WHAT the business needs (not HOW to implement it)
 - Product rules conflict with each other in a way that changes user-facing behavior
@@ -655,16 +667,16 @@ Validate against appropriate schema:
 
 ## Save File
 
-Save to `ai_files/logbooks/[filename].json`
+Save to `ai_files/waves/[target_wave]/logbooks/[filename].json`
 
-Ensure `ai_files/logbooks/` directory exists, create if needed.
+Ensure `ai_files/waves/[target_wave]/logbooks/` directory exists, create if needed.
 
 ## Success Message
 
 ```
 ✅ Logbook created successfully!
 
-📁 File: ai_files/logbooks/[filename].json
+📁 File: ai_files/waves/[target_wave]/logbooks/[filename].json
 
 📊 Summary:
 • Ticket: [title]

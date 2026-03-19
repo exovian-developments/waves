@@ -23,15 +23,15 @@ If missing, ask user to run `project-init` first.
 
 ## Step 2: Select Roadmap File
 
-List available roadmap files (both wave convention and legacy):
+List available roadmap files in wave directories:
 
 ```bash
-ls -1 ai_files/roadmap_w*.json ai_files/*_roadmap.json 2>/dev/null | sort -u | while read f; do basename "$f"; done
+ls -1 ai_files/waves/*/roadmap.json 2>/dev/null
 ```
 
 If none found:
 ```
-⚠ No roadmaps found in ai_files/
+⚠ No roadmaps found in ai_files/waves/
 
 To create a new roadmap, run: roadmap-create
 ```
@@ -39,7 +39,7 @@ Exit.
 
 If exactly one roadmap exists:
 ```
-✓ Using roadmap: {filename}
+✓ Using roadmap: Wave {wave_name} (ai_files/waves/{wave_name}/roadmap.json)
 ```
 
 If multiple exist, ask:
@@ -47,11 +47,12 @@ If multiple exist, ask:
 📋 Which roadmap would you like to update?
 
 Options:
-  1. {roadmap_name_1}
-  2. {roadmap_name_2}
+  1. Wave sub-zero (ai_files/waves/sub-zero/roadmap.json)
+  2. Wave 0 (ai_files/waves/w0/roadmap.json)
+  3. Wave 1 (ai_files/waves/w1/roadmap.json)
   ...
 
-Choose a number:
+Choose a number or wave name:
 ```
 
 Store selected roadmap path.
@@ -457,7 +458,7 @@ To view detailed progress, run:
   or logbook-update (for existing logbooks)
 {/if}
 
-Roadmap file: ai_files/{filename}
+Roadmap file: ai_files/waves/{wave_name}/roadmap.json
 Last updated: {timestamp}
 ```
 

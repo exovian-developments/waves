@@ -43,13 +43,27 @@ After setup, a project will have:
 project/
 ├── ai_files/
 │   ├── schemas/                    # JSON schemas (reference)
-│   ├── logbooks/                   # Work logbooks
-│   ├── resolutions/                # Ticket resolutions
 │   ├── user_pref.json              # User preferences
 │   ├── project_manifest.json       # Project analysis
 │   ├── project_rules.json          # Coding rules
-│   ├── roadmap_w*.json             # Product roadmaps as waves (w0=foundation, w1+=business)
-│   └── *_logbook.json              # Detailed logbooks (per milestone)
+│   ├── feasibility.json            # Feasibility analysis (one per project)
+│   ├── foundation.json             # Product foundation
+│   ├── blueprint.json              # Product blueprint
+│   └── waves/
+│       ├── sub-zero/
+│       │   ├── roadmap.json
+│       │   └── logbooks/
+│       ├── w0/
+│       │   ├── roadmap.json
+│       │   └── logbooks/
+│       ├── w1/
+│       │   ├── roadmap.json
+│       │   ├── logbooks/
+│       │   └── resolutions/
+│       └── wN/
+│           ├── roadmap.json
+│           ├── logbooks/
+│           └── resolutions/
 └── CLAUDE.md                       # Updated with preferences reference
 ```
 
@@ -137,7 +151,7 @@ LOGBOOK (HOW + DETAIL)
 | **Scope** | Product-wide | Phase-wide | Milestone-specific |
 | **Detail** | Business & vision | Strategy & sequencing | Implementation & code |
 | **Audience** | Stakeholders | Product team | Dev team |
-| **File Type** | manifest.json | roadmap_w*.json | *_logbook.json |
+| **File Type** | manifest.json | waves/*/roadmap.json | waves/*/logbooks/*.json |
 | **Update Frequency** | Once/project | Weekly/monthly | Per work session |
 
 **Relationship:**

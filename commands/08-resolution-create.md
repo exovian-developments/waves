@@ -14,7 +14,7 @@
 
 **Input:** Logbook file (parameter or selection) - must be from a software project
 
-**Output:** Resolution markdown file in `ai_files/resolutions/`
+**Output:** Resolution markdown file in `ai_files/waves/[wN]/resolutions/` (same wave as the source logbook)
 
 **Parameters:** `[logbook]` (optional) - Logbook filename to use
 
@@ -84,12 +84,13 @@ STEP 4: Show preview and confirm
         "¿Guardar esta resolución? (Si/No/Editar)"
 
 STEP 5: Save file
-        └─ ai_files/resolutions/auth-implementation-resolution.md
+        └─ ai_files/waves/[wN]/resolutions/auth-implementation-resolution.md
+           (same wave as the source logbook — derive wN from the logbook path)
 
 STEP 6: Success message
         "✅ Resolución creada!
 
-         📁 Archivo: ai_files/resolutions/auth-implementation-resolution.md
+         📁 Archivo: ai_files/waves/[wN]/resolutions/auth-implementation-resolution.md
 
          💡 Tip: Esta resolución servirá como referencia futura
          para problemas similares."
@@ -99,12 +100,14 @@ STEP 6: Success message
 
 ## Output Naming Convention
 
-```
-Logbook: auth-implementation.json
-Resolution: auth-implementation-resolution.md
+The resolution is saved in the **same wave** as the source logbook. Derive the wave from the logbook's path (e.g., if the logbook is at `ai_files/waves/w1/logbooks/auth-implementation.json`, the resolution goes to `ai_files/waves/w1/resolutions/`). Do not ask the user which wave — infer it automatically.
 
-Logbook: bug-fix-login.json
-Resolution: bug-fix-login-resolution.md
+```
+Logbook: ai_files/waves/w1/logbooks/auth-implementation.json
+Resolution: ai_files/waves/w1/resolutions/auth-implementation-resolution.md
+
+Logbook: ai_files/waves/w2/logbooks/bug-fix-login.json
+Resolution: ai_files/waves/w2/resolutions/bug-fix-login-resolution.md
 ```
 
 ---

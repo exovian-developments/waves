@@ -24,9 +24,9 @@ Check if `ai_files/user_pref.json` exists.
 
 ## Step 0: Load Foundation & Validate Readiness
 
-1. Check if `ai_files/product_foundation.json` exists
+1. Check if `ai_files/foundation.json` exists
 2. IF NOT EXISTS:
-   - Check for `ai_files/*_feasibility.json`
+   - Check for `ai_files/feasibility.json`
    - If feasibility exists → EXIT: "Foundation not found. Run /waves:foundation-create first."
    - If nothing exists → EXIT: "No foundation or feasibility found. Run /waves:feasibility-analyze first."
 3. IF EXISTS: Read completely into memory
@@ -34,8 +34,8 @@ Check if `ai_files/user_pref.json` exists.
    - If `false`: Show blocking issues. Ask: "Proceed anyway? (Yes / No)"
    - If "No" → EXIT
 5. Extract product name from `foundation.meta.product_name` (or use parameter)
-6. Check if `ai_files/product_blueprint.json` already exists → warn if so
-7. Optionally load `ai_files/*_feasibility.json` for deeper context if available
+6. Check if `ai_files/blueprint.json` already exists → warn if so
+7. Optionally load `ai_files/feasibility.json` for deeper context if available
 8. Load `ai_files/project_manifest.json` if exists (for tech stack context)
 
 ## Step 1: Set Blueprint Type & Owner
@@ -288,14 +288,14 @@ Store as `blueprint.product_decisions[]` and `blueprint.open_questions[]`.
    - `last_updated`: current UTC ISO 8601
    - `blueprint_type`: from Step 1
 4. Validate against schema
-5. Write to `ai_files/product_blueprint.json`
+5. Write to `ai_files/blueprint.json`
 
 ## Step 17: Summary
 
 ```
 ✅ Product Blueprint created!
 
-📁 File: ai_files/product_blueprint.json
+📁 File: ai_files/blueprint.json
 
 📊 Summary:
 • Product: [name] ([type])

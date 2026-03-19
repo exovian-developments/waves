@@ -113,7 +113,7 @@ IF No → Exit
 ### Step 1.1: Check Parameter
 
 IF logbook parameter provided:
-- Validate file exists: `ai_files/logbooks/[logbook]`
+- Validate file exists in `ai_files/waves/*/logbooks/[logbook]`
 - IF NOT EXISTS:
   ```
   ⚠️ Logbook not found: [logbook]
@@ -124,11 +124,11 @@ IF logbook parameter provided:
 
 ### Step 1.2: List Available Logbooks
 
-Scan `ai_files/logbooks/` directory.
+Scan `ai_files/waves/*/logbooks/` directories for `.json` files.
 
 IF empty:
 ```
-📂 No logbooks found in ai_files/logbooks/
+📂 No logbooks found in ai_files/waves/*/logbooks/
 
 To create a logbook for your task, run:
   /waves:logbook-create [filename]
@@ -147,11 +147,11 @@ IF logbooks exist:
 ```
 📚 Available logbooks:
 
-  #  Logbook                    Last Modified      Main Objectives
-  ─────────────────────────────────────────────────────────────────
-  1  TICKET-123.json            2 hours ago        2 (1 active)
-  2  feature-auth.json          1 day ago          3 (0 active)
-  3  bug-fix-login.json         3 days ago         1 (1 achieved)
+  #  Wave  Logbook                    Last Modified      Main Objectives
+  ──────────────────────────────────────────────────────────────────────────
+  1  w1    TICKET-123.json            2 hours ago        2 (1 active)
+  2  w1    feature-auth.json          1 day ago          3 (0 active)
+  3  w2    bug-fix-login.json         3 days ago         1 (1 achieved)
 
 Options:
   [1-N] Select logbook by number
@@ -483,7 +483,7 @@ IF "No" or "Quit" → Show final summary and exit
   • Files modified: 1
   • Audit attempts: 3 (all passed)
 
-📋 Logbook updated: ai_files/logbooks/[filename]
+📋 Logbook updated: ai_files/waves/[wN]/logbooks/[filename]
 
 💡 Commands:
   • Continue later: /waves:implement [filename]

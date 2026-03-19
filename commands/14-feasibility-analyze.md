@@ -11,9 +11,9 @@
 
 **Schema:** `schemas/feasibility_analysis_schema.json`
 
-**Output:** `ai_files/[name]_feasibility.json`
+**Output:** `ai_files/feasibility.json`
 
-**Parameters:** `[name]` (optional) - Short identifier for the analysis
+**Parameters:** Product name goes inside the JSON (`meta.analysis_name`), not in the filename
 
 **Key Features:**
 - Conversational idea discovery with expert consultant role
@@ -112,7 +112,7 @@ Each graphic includes an **interpretation paragraph in natural language** below,
 | Flow | Condition | Description |
 |------|-----------|-------------|
 | **Flow A** | New analysis (no existing feasibility file) | Full discovery from idea to projections |
-| **Flow B** | Existing `ai_files/[name]_feasibility.json` found | Load existing analysis, jump to iteration checkpoint |
+| **Flow B** | Existing `ai_files/feasibility.json` found | Load existing analysis, jump to iteration checkpoint |
 
 ---
 
@@ -145,14 +145,30 @@ Each graphic includes an **interpretation paragraph in natural language** below,
 
 ## Step 0: Parameter and Flow Detection
 
-1. IF `[name]` parameter provided:
-   - Check if `ai_files/[name]_feasibility.json` exists
-   - IF EXISTS → Set `flow = B`, load existing analysis, go to Step 12 (Iteration Checkpoint)
-   - IF NOT EXISTS → Set `flow = A`, store `analysis_name = [name]`, go to Step 1
+1. Check if `ai_files/feasibility.json` already exists:
+   - IF EXISTS → **FLOW B**: Load existing analysis, display summary, warn about overwrite/iteration:
+     ```
+     ⚠️ A feasibility analysis already exists:
+     ai_files/feasibility.json
 
-2. IF no parameter:
-   - Ask user for a short name for the analysis
-   - Set `flow = A`, go to Step 1
+     Product: [existing.meta.analysis_name]
+     Iterations: [existing.meta.iteration_count]
+
+     Options:
+     1. Continue iterating on this analysis (go to Iteration Checkpoint)
+     2. Start fresh (overwrite existing)
+     3. Cancel
+
+     Choose:
+     ```
+     - IF "1" → Go to Step 12 (Iteration Checkpoint)
+     - IF "2" → Set `flow = A`, go to Step 1
+     - IF "3" → EXIT
+   - IF NOT EXISTS → Set `flow = A`, go to Step 1
+
+2. IF no product name provided as parameter:
+   - Ask user for a short name for the analysis (stored in `meta.analysis_name`)
+   - Go to Step 1
 
 ---
 
@@ -673,13 +689,13 @@ Handle user choice:
 ## Step 13: Save and Next Step
 
 1. Validate feasibility JSON against schema
-2. Save to `ai_files/[name]_feasibility.json`
+2. Save to `ai_files/feasibility.json`
 3. Present summary:
 
 ```
 ✅ Feasibility analysis saved!
 
-📁 File: ai_files/[name]_feasibility.json
+📁 File: ai_files/feasibility.json
 
 📊 Summary:
   • Idea: [core_idea]

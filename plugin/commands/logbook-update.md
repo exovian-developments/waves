@@ -35,9 +35,9 @@ IF EXISTS:
 Check if filename parameter was provided with the command.
 
 **IF parameter provided:**
-1. Validate file exists: `ai_files/logbooks/[filename].json`
+1. Search for file in `ai_files/waves/*/logbooks/[filename].json`
 2. IF NOT EXISTS → Error: "Logbook not found: [filename]"
-3. IF EXISTS → Load logbook, continue
+3. IF EXISTS → Load logbook, note which wave it belongs to, continue
 
 **IF NO parameter:**
 1. Show tip:
@@ -46,7 +46,7 @@ Check if filename parameter was provided with the command.
    logbook-update TICKET-123.json
 ```
 
-2. List available logbooks and let user select
+2. List available logbooks from all waves `ai_files/waves/*/logbooks/*.json`, showing which wave each belongs to, and let user select
 
 ## Step 1: Check Due Reminders
 
@@ -359,14 +359,14 @@ Return to calling step.
 - IF `project_type === "software"` → Validate against `${CLAUDE_PLUGIN_ROOT}/skills/waves-protocol/references/logbook_software_schema.json`
 - IF `project_type === "general"` → Validate against `${CLAUDE_PLUGIN_ROOT}/skills/waves-protocol/references/logbook_general_schema.json`
 
-**Save to `ai_files/logbooks/[filename].json`**
+**Save to `ai_files/waves/[wave_name]/logbooks/[filename].json`**
 
 **Show summary:**
 
 ```
 ✅ Logbook updated!
 
-📁 File: ai_files/logbooks/[filename].json
+📁 File: ai_files/waves/[wave_name]/logbooks/[filename].json
 
 📊 Changes made:
 • Context entries added: [count]

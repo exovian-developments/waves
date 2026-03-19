@@ -10,9 +10,9 @@
 
 **Schema:** `ai_files/schemas/product_foundation_schema.json`
 
-**Input:** `ai_files/*_feasibility.json` (required)
+**Input:** `ai_files/feasibility.json` (required)
 
-**Output:** `ai_files/product_foundation.json`
+**Output:** `ai_files/foundation.json`
 
 **Parameters:** `[product-name]` (optional — if not provided, inferred from feasibility)
 
@@ -55,9 +55,9 @@
 **STEP 0: Locate Feasibility Analysis**
 **═══════════════════════════════════════════════════════════════════**
 
-3. MAIN AGENT: Scan `ai_files/` for `*_feasibility.json` files
+3. MAIN AGENT: Check if `ai_files/feasibility.json` exists
 
-4. IF NO feasibility files found:
+4. IF NOT EXISTS:
    ```
    ⚠️ No feasibility analysis found!
 
@@ -71,23 +71,16 @@
    ```
    → **EXIT COMMAND**
 
-5. IF ONE feasibility file found:
-   - Auto-select it
+5. IF EXISTS:
+   - Read `ai_files/feasibility.json` completely into memory
+   - Store as `feasibility` object
    - Extract `meta.analysis_name` as product name (if parameter not provided)
 
-6. IF MULTIPLE feasibility files found:
-   - List all with analysis_name, last_updated, iteration_count
-   - Ask user to select one
-   - Store as `selected_feasibility_path`
-
-7. Read the selected feasibility file completely into memory
-   - Store as `feasibility` object
-
-8. Check if `ai_files/product_foundation.json` already exists:
+8. Check if `ai_files/foundation.json` already exists:
    - IF EXISTS: Warn user:
      ```
      ⚠️ A product foundation already exists:
-     ai_files/product_foundation.json
+     ai_files/foundation.json
 
      Product: [existing.meta.product_name]
      Source: [existing.meta.source_feasibility]
@@ -482,7 +475,7 @@
 
 41. Validate against `ai_files/schemas/product_foundation_schema.json`
 
-42. Write to `ai_files/product_foundation.json`
+42. Write to `ai_files/foundation.json`
 
 ---
 
@@ -494,7 +487,7 @@
     ```
     ✅ Product Foundation created!
 
-    📁 File: ai_files/product_foundation.json
+    📁 File: ai_files/foundation.json
 
     📊 Summary:
     • Product: [name]

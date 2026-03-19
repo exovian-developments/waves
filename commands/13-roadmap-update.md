@@ -50,8 +50,8 @@
    ```
    → **EXIT COMMAND**
 
-2. MAIN AGENT: Check if at least one roadmap file exists in `ai_files/`
-   - Search both patterns: `roadmap_w*.json` (wave convention) and `*_roadmap.json` (legacy)
+2. MAIN AGENT: Check if at least one roadmap file exists
+   - Search for `ai_files/waves/*/roadmap.json`
 
 3. IF NO roadmap files exist:
    ```
@@ -78,36 +78,36 @@
 
 6. IF parameter provided:
    - Try to resolve to actual file path in order:
-     1. Exact match: `ai_files/[parameter]` (if ends with `.json`)
-     2. Wave match: `ai_files/roadmap_w[parameter].json` (if parameter is a number)
-     3. Legacy match: `ai_files/[parameter]_roadmap.json`
+     1. Exact wave directory match: `ai_files/waves/[parameter]/roadmap.json` (if parameter is a wave name like "w0", "w1", "sub-zero")
+     2. Wave number match: `ai_files/waves/w[parameter]/roadmap.json` (if parameter is a number)
    - Check if resolved file exists
    - IF exists → Store as `selected_roadmap_path`
    - IF not exists → MAIN AGENT (example in Spanish):
      ```
-     ⚠️ Roadmap not found: ai_files/[roadmap-file]
+     ⚠️ Roadmap not found: [parameter]
 
      Available roadmaps:
-     • ai_files/roadmap_w0.json (Foundation)
-     • ai_files/roadmap_w1.json (Business Wave 1)
+     • Wave sub-zero (ai_files/waves/sub-zero/roadmap.json)
+     • Wave 0 (ai_files/waves/w0/roadmap.json)
+     • Wave 1 (ai_files/waves/w1/roadmap.json)
      [...]
 
-     Try again with correct name or wave number:
-     /waves:roadmap-update 0        (by wave number)
-     /waves:roadmap-update roadmap_w0.json  (by filename)
+     Try again with correct wave name:
+     /waves:roadmap-update w0        (by wave name)
+     /waves:roadmap-update sub-zero  (by wave name)
      ```
      → **EXIT COMMAND**
 
 7. IF parameter NOT provided:
-   - MAIN AGENT: List all roadmaps in `ai_files/` (both `roadmap_w*.json` and `*_roadmap.json`):
+   - MAIN AGENT: List all roadmaps found in `ai_files/waves/*/roadmap.json`:
      ```
      🗂️ Available roadmaps:
 
-     1. roadmap_w0.json (Foundation)
-     2. roadmap_w1.json (Business Wave 1)
-     3. roadmap_w2.json (Business Wave 2)
+     1. Wave sub-zero (ai_files/waves/sub-zero/roadmap.json)
+     2. Wave 0 (ai_files/waves/w0/roadmap.json)
+     3. Wave 1 (ai_files/waves/w1/roadmap.json)
 
-     Which roadmap do you want to update? (Enter number, wave number, or filename):
+     Which roadmap do you want to update? (Enter number or wave name):
      ```
    - USER: Selects option
    - Store as `selected_roadmap_path`
@@ -704,13 +704,13 @@
 
 64. SUBAGENT: Manage context compaction:
     - IF `recent_context.length > 20`:
-      - Archive oldest 10 entries to separate file: `ai_files/roadmap_w[N]_archive.json`
+      - Archive oldest 10 entries to separate file: `ai_files/waves/[wave_name]/roadmap_archive.json`
       - Keep most recent 10 in main roadmap
       - Add pointer to archive in main file
 
 65. SUBAGENT: Validate entire roadmap against `logbook_roadmap_schema.json`
 
-66. SUBAGENT: Write updated roadmap to `ai_files/roadmap_w[N].json`
+66. SUBAGENT: Write updated roadmap to `ai_files/waves/[wave_name]/roadmap.json`
 
 ---
 
@@ -723,7 +723,7 @@
     ✅ ¡Roadmap actualizado exitosamente!
 
     📁 Archivo actualizado:
-      • ai_files/roadmap_w[N].json
+      • ai_files/waves/[wave_name]/roadmap.json
 
     📊 Cambios aplicados:
       • Hitos actualizados: 2
@@ -757,14 +757,14 @@
     /waves:logbook-create [product-name]-phase-3
 
     O transiciona en el roadmap:
-    /waves:roadmap-update roadmap_w[N].json
+    /waves:roadmap-update [wave_name]
     (selecciona opción 4: "Transicionar a siguiente fase")
     ```
 
 70. Standard tip:
     ```
     💡 Tip: Mantén el roadmap sincronizado conforme avanzas:
-      /waves:roadmap-update roadmap_w[N].json
+      /waves:roadmap-update [wave_name]
     ```
 
 ---
