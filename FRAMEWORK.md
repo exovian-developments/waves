@@ -1,6 +1,6 @@
 # Waves Framework
 
-**Version:** 1.2.0
+**Version:** 1.3.0
 **Last updated:** 2026-03-19
 **Status:** Active
 
@@ -646,4 +646,4 @@ Some roadmaps orchestrate work across multiple repositories (e.g., extracting sh
 
 ---
 
-*Waves Framework v1.2.0 — Created 2026-03-16, updated 2026-03-19 by Exovian Developments*
+*Waves Framework v1.3.0 — Created 2026-03-16, updated 2026-03-19 by Exovian Developments*
