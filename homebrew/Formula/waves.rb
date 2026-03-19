@@ -1,8 +1,8 @@
 class Waves < Formula
   desc "Structured context protocol for AI agents — Claude, Codex, Gemini CLI"
   homepage "https://github.com/exovian-developments/waves"
-  url "https://github.com/exovian-developments/waves/archive/refs/tags/v1.3.0.tar.gz"
-  sha256 "386b3b5ba19742a3752f8dc7c7b8426c9a6c7f45c2389626d04f9c0e13cc0855"
+  url "https://github.com/exovian-developments/waves/archive/refs/tags/v1.3.1.tar.gz"
+  sha256 "4b23b52730f73b3caa55a6e0bfb6ea0569b8d3b80eaf5019437c8d1997a08c94"
   license "AGPL-3.0-or-later"
 
   def install
