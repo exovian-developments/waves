@@ -224,6 +224,13 @@ Wave types:
 
 Write the roadmap JSON to the file.
 
+**Prepend** a reference to `product_roadmaps` in `ai_files/blueprint.json` (if blueprint exists):
+- Read `ai_files/blueprint.json`
+- If `product_roadmaps` array does not exist, create it as empty array first
+- Prepend (insert at index 0) a new entry: `{"wave": "[wave_name]", "path": "waves/[wave_name]/roadmap.json"}`
+- Write the updated blueprint back
+- If blueprint does not exist, skip this step silently
+
 ## Step 8: Confirm Success
 
 Display:

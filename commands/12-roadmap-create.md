@@ -490,6 +490,13 @@
 
 44. SUBAGENT: Write to `ai_files/waves/[wave_name]/roadmap.json` (where wave_name is from STEP 0)
 
+45. MAIN AGENT: **Prepend** a reference to `product_roadmaps` in `ai_files/blueprint.json` (if blueprint exists):
+    - Read `ai_files/blueprint.json`
+    - If `product_roadmaps` array does not exist, create it as empty array first
+    - Prepend (insert at index 0) a new entry: `{"wave": "[wave_name]", "path": "waves/[wave_name]/roadmap.json"}`
+    - Write the updated blueprint back
+    - If blueprint does not exist, skip this step silently
+
 ---
 
 **═══════════════════════════════════════════════════════════════════**

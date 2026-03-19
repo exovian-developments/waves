@@ -285,6 +285,16 @@
       "items": {
         "$ref": "#/$defs/open_question"
       }
+    },
+
+    "product_roadmaps": {
+      "type": "array",
+      "description": "Ordered list of roadmaps associated with this product. Most recent roadmap first (prepend-only).",
+      "$comment": "This array is the authoritative link between the blueprint and its roadmaps. It is managed EXCLUSIVELY by the roadmap-create command — never insert entries manually or from blueprint-create. New entries are always prepended (index 0), never appended. For new products or new blueprints, this array starts empty. Each entry contains the wave name and the relative path to the roadmap file within ai_files/. The roadmap files themselves contain logbook references that complete the traceability chain: blueprint → roadmap → logbook.",
+      "items": {
+        "$ref": "#/$defs/product_roadmap_ref"
+      },
+      "default": []
     }
   },
 
@@ -666,6 +676,25 @@
         }
       },
       "required": ["id", "created_at", "question", "status"]
+    },
+
+    "product_roadmap_ref": {
+      "type": "object",
+      "description": "Reference to a roadmap file associated with this product.",
+      "$comment": "Managed exclusively by roadmap-create. New entries are always prepended (index 0) — the first element is the most recent roadmap. Never append. Never insert manually from blueprint-create. The path is relative to ai_files/ within the same repository. For cross-project roadmaps, the path may use the portable format org/repo::waves/wN/roadmap.json.",
+      "properties": {
+        "wave": {
+          "type": "string",
+          "description": "Wave identifier: 'sub-zero', 'w0', 'w1', 'w2', etc.",
+          "$comment": "Must match the directory name under waves/. Use 'sub-zero' for validation waves, 'w0' for definition waves, 'w1'+ for business waves."
+        },
+        "path": {
+          "type": "string",
+          "description": "Relative path to the roadmap file from ai_files/.",
+          "$comment": "Standard format: waves/wN/roadmap.json. For cross-project references: org/repo::waves/wN/roadmap.json."
+        }
+      },
+      "required": ["wave", "path"]
     }
   }
 }
