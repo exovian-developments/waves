@@ -11,7 +11,7 @@
 
 set -e
 
-VERSION="1.3.0"
+VERSION="1.3.1"
 
 # Colors for output
 RED='\033[0;31m'
@@ -92,8 +92,8 @@ show_help() {
     echo -e "${BOLD}COMMANDS${NC}"
     echo "    init [agent]    Initialize waves in current directory"
     echo "                    Supported agents: claude, codex (coming soon)"
-    echo "    update          Update schemas and commands in current directory"
-    echo "                    Auto-detects installed agent(s), preserves user data"
+    echo "    upgrade         Upgrade waves globally (Homebrew or git) and update"
+    echo "                    the current project if inside one"
     echo ""
     echo -e "${BOLD}OPTIONS${NC}"
     echo "    --version, -v   Show version"
@@ -102,7 +102,7 @@ show_help() {
     echo -e "${BOLD}EXAMPLES${NC}"
     echo "    waves init           # Interactive agent selection"
     echo "    waves init claude    # Initialize for Claude Code"
-    echo "    waves update         # Update current project in-place"
+    echo "    waves upgrade        # Upgrade global + update current project"
     echo ""
     echo -e "${BOLD}AFTER INITIALIZATION${NC}"
     echo "    1. Start your AI agent (claude or codex)"
@@ -398,113 +398,145 @@ cmd_init() {
     echo ""
 }
 
-# Update command - non-interactive, auto-detects agent
-cmd_update() {
+# Upgrade command - updates global installation + local project
+cmd_upgrade() {
+    show_banner
+
+    local old_version="$VERSION"
+    local upgraded=false
+
+    # Step 1: Upgrade global installation
+    if command -v brew &> /dev/null; then
+        local brew_prefix
+        brew_prefix="$(brew --prefix 2>/dev/null)"
+
+        # Check if waves is installed via Homebrew
+        if brew list waves &> /dev/null; then
+            echo -e "${BLUE}Checking for updates via Homebrew...${NC}"
+            brew update --quiet 2>/dev/null
+
+            local outdated
+            outdated=$(brew outdated waves 2>/dev/null)
+            if [ -n "$outdated" ]; then
+                echo -e "  ${YELLOW}New version available${NC}"
+                brew upgrade waves 2>/dev/null
+                # Re-read version from upgraded binary
+                local new_bin="$brew_prefix/bin/waves"
+                if [ -f "$new_bin" ]; then
+                    local new_version
+                    new_version=$(grep '^VERSION=' "$new_bin" 2>/dev/null | head -1 | cut -d'"' -f2)
+                    if [ -n "$new_version" ]; then
+                        echo -e "  ${GREEN}✓${NC} Upgraded ${YELLOW}v${old_version}${NC} → ${GREEN}v${new_version}${NC}"
+                        VERSION="$new_version"
+                        upgraded=true
+                    fi
+                fi
+            else
+                echo -e "  ${GREEN}✓${NC} Already on latest version (v${VERSION})"
+            fi
+        else
+            echo -e "${YELLOW}waves is not installed via Homebrew${NC}"
+            echo -e "  Checking git source..."
+        fi
+    fi
+
+    # Step 2: If installed via git (dev mode), pull latest
     local data_dir
     data_dir="$(get_data_dir)"
 
-    if [ -z "$data_dir" ]; then
-        echo -e "${RED}Error: Could not find waves data files${NC}"
-        echo ""
-        echo "Please reinstall waves:"
-        echo "  brew reinstall waves"
-        exit 1
-    fi
-
-    # Pull latest from remote if data_dir is a git repository
-    if [ -d "$data_dir/.git" ]; then
-        echo -e "${BLUE}Fetching latest waves from remote...${NC}"
+    if [ -n "$data_dir" ] && [ -d "$data_dir/.git" ] && ! $upgraded; then
+        echo -e "${BLUE}Pulling latest from git...${NC}"
         local pull_output
         if pull_output=$(cd "$data_dir" && git pull origin main 2>&1); then
             if echo "$pull_output" | grep -q "Already up to date"; then
                 echo -e "  ${GREEN}✓${NC} Already up to date"
             else
-                # Re-read version from the updated script
                 local new_version
                 new_version=$(grep '^VERSION=' "$data_dir/bin/waves" 2>/dev/null | head -1 | cut -d'"' -f2)
-                if [ -n "$new_version" ] && [ "$new_version" != "$VERSION" ]; then
-                    echo -e "  ${GREEN}✓${NC} Updated source ${YELLOW}v${VERSION}${NC} → ${GREEN}v${new_version}${NC}"
+                if [ -n "$new_version" ] && [ "$new_version" != "$old_version" ]; then
+                    echo -e "  ${GREEN}✓${NC} Updated ${YELLOW}v${old_version}${NC} → ${GREEN}v${new_version}${NC}"
                     VERSION="$new_version"
+                    upgraded=true
                 else
                     echo -e "  ${GREEN}✓${NC} Source updated"
                 fi
             fi
         else
-            echo -e "  ${YELLOW}⚠${NC} Could not pull from remote (continuing with local files)"
-            echo -e "    ${CYAN}$pull_output${NC}" | head -3
+            echo -e "  ${YELLOW}⚠${NC} Could not pull from remote"
+            echo -e "    ${CYAN}$(echo "$pull_output" | head -2)${NC}"
         fi
-        echo ""
     fi
 
-    # Detect which agents are installed
-    local has_claude=false
-    local has_codex=false
-    local has_ai_files=false
+    echo ""
 
+    # Step 3: If we're inside a project, update local files too
+    local has_claude=false
+    local has_ai_files=false
     [ -d ".claude/commands" ] && has_claude=true
-    [ -d ".codex/commands" ] && has_codex=true
     [ -d "ai_files" ] && has_ai_files=true
 
-    if ! $has_claude && ! $has_codex && ! $has_ai_files; then
-        echo -e "${RED}Error: No waves installation detected in current directory${NC}"
+    if $has_claude || $has_ai_files; then
+        echo -e "${BLUE}Updating current project...${NC}"
+
+        # Re-resolve data_dir in case it changed after upgrade
+        data_dir="$(get_data_dir)"
+
+        if [ -z "$data_dir" ]; then
+            echo -e "  ${RED}Could not find waves data files after upgrade${NC}"
+            return 1
+        fi
+
+        # Update schemas
+        if [ -d "ai_files/schemas" ]; then
+            local schema_count=0
+            for schema in "$data_dir/schemas/"*.json; do
+                if [ -f "$schema" ]; then
+                    cp "$schema" "ai_files/schemas/$(basename "$schema")"
+                    schema_count=$((schema_count + 1))
+                fi
+            done
+            echo -e "  ${GREEN}✓${NC} $schema_count schemas updated"
+        fi
+
+        # Update Claude commands
+        if $has_claude; then
+            # Remove old ai-behavior commands if any remain
+            local migrated=0
+            for old_cmd in .claude/commands/ai-behavior:*.md; do
+                if [ -f "$old_cmd" ]; then
+                    rm "$old_cmd"
+                    migrated=$((migrated + 1))
+                fi
+            done
+            [ $migrated -gt 0 ] && echo -e "  ${GREEN}✓${NC} Removed $migrated legacy ai-behavior commands"
+
+            # Copy latest waves commands
+            local cmd_count=0
+            for cmd in "$data_dir/.claude/commands/"waves:*.md; do
+                if [ -f "$cmd" ]; then
+                    cp "$cmd" ".claude/commands/$(basename "$cmd")"
+                    cmd_count=$((cmd_count + 1))
+                fi
+            done
+            echo -e "  ${GREEN}✓${NC} $cmd_count waves commands updated"
+        fi
+
+        # Show preserved artifacts
         echo ""
-        echo "Run ${CYAN}waves init${NC} first to set up your project."
-        exit 1
+        echo -e "${GREEN}Preserved (untouched):${NC}"
+        [ -f "ai_files/user_pref.json" ] && echo -e "  ${CYAN}✓${NC} user_pref.json"
+        [ -f "ai_files/blueprint.json" ] && echo -e "  ${CYAN}✓${NC} blueprint.json"
+        [ -f "ai_files/project_manifest.json" ] && echo -e "  ${CYAN}✓${NC} project_manifest.json"
+        [ -f "ai_files/project_rules.json" ] && echo -e "  ${CYAN}✓${NC} project_rules.json"
+        [ -d "ai_files/waves" ] && echo -e "  ${CYAN}✓${NC} waves/"
+        [ -f "CLAUDE.md" ] && echo -e "  ${CYAN}✓${NC} CLAUDE.md"
+    else
+        echo -e "${CYAN}Not inside a waves project — only global installation was upgraded.${NC}"
+        echo -e "To update a project, ${CYAN}cd${NC} into it and run ${CYAN}waves upgrade${NC} again."
     fi
-
-    echo -e "${BLUE}Updating waves to v${VERSION}...${NC}"
-    echo ""
-
-    # Update schemas
-    if $has_ai_files || $has_claude || $has_codex; then
-        mkdir -p ai_files/schemas
-        local schema_count=0
-        for schema in "$data_dir/schemas/"*.json; do
-            if [ -f "$schema" ]; then
-                local filename=$(basename "$schema")
-                cp "$schema" "ai_files/schemas/$filename"
-                schema_count=$((schema_count + 1))
-            fi
-        done
-        echo -e "  ${GREEN}✓${NC} $schema_count schemas updated"
-    fi
-
-    # Update Claude commands
-    if $has_claude; then
-        local cmd_count=0
-        for cmd in "$data_dir/.claude/commands/"*.md; do
-            if [ -f "$cmd" ]; then
-                local filename=$(basename "$cmd")
-                cp "$cmd" ".claude/commands/$filename"
-                cmd_count=$((cmd_count + 1))
-            fi
-        done
-        echo -e "  ${GREEN}✓${NC} $cmd_count Claude commands updated"
-    fi
-
-    # Update Codex commands (future)
-    if $has_codex; then
-        echo -e "  ${GREEN}✓${NC} Codex commands updated"
-    fi
-
-    # Show what was preserved
-    echo ""
-    echo -e "${GREEN}Preserved (untouched):${NC}"
-    [ -f "ai_files/user_pref.json" ] && echo -e "  ${CYAN}✓${NC} user_pref.json"
-    [ -f "ai_files/project_manifest.json" ] && echo -e "  ${CYAN}✓${NC} project_manifest.json"
-    [ -f "ai_files/project_rules.json" ] && echo -e "  ${CYAN}✓${NC} project_rules.json"
-    [ -d "ai_files/logbooks" ] && echo -e "  ${CYAN}✓${NC} logbooks/"
-    [ -f "ai_files/product_blueprint.json" ] && echo -e "  ${CYAN}✓${NC} product_blueprint.json"
-    [ -f "ai_files/product_foundation.json" ] && echo -e "  ${CYAN}✓${NC} product_foundation.json"
-    for feas in ai_files/*_feasibility.json; do
-        [ -f "$feas" ] && echo -e "  ${CYAN}✓${NC} $(basename "$feas")"
-    done
-    for road in ai_files/*_roadmap.json ai_files/roadmap_w*.json; do
-        [ -f "$road" ] && echo -e "  ${CYAN}✓${NC} $(basename "$road")"
-    done
 
     echo ""
-    echo -e "${GREEN}${BOLD}Update complete!${NC} (v${VERSION})"
+    echo -e "${GREEN}${BOLD}Upgrade complete!${NC} (v${VERSION})"
 }
 
 # Main entry point
@@ -514,7 +546,7 @@ main() {
             cmd_init "$2"
             ;;
         update|upgrade)
-            cmd_update
+            cmd_upgrade
             ;;
         --version|-v)
             show_version
