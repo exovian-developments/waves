@@ -219,5 +219,5 @@ waves/
 
 ## Licencia
 
-- Código y schemas: Apache-2.0 (ver `LICENSE`)
+- Código y schemas: AGPL-3.0-or-later (ver `LICENSE`)
 - Documentación: CC BY 4.0 (opcional)

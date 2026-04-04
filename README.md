@@ -484,7 +484,7 @@ The `schemas/` and `subagents/` directories are the canonical design. The `plugi
 
 ## License
 
-- Code and schemas: Apache-2.0 (see `LICENSE`)
+- Code and schemas: AGPL-3.0-or-later (see `LICENSE`)
 - Documentation: CC BY 4.0 (optional)
 
 ---
