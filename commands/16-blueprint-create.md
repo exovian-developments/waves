@@ -298,19 +298,23 @@
 
     **Only include capabilities where foundation.classification = "essential"**
 
-33. Present:
+33. For complex capabilities (multiple concrete characteristics), add a `details` array.
+    Simple capabilities don't need details — the description is enough.
+
+34. Present:
     ```
     🎯 ESSENTIAL CAPABILITIES (from foundation, essential only)
 
     [For each essential:]
     [new_id]. [capability text]
         [depends_on: #X, #Y if any]
+        [details: (if complex) list of characteristics]
 
     These are the minimum without which the product CANNOT exist.
-    Confirm / Add / Remove / Reclassify:
+    Confirm / Add / Remove / Reclassify / Add details to any capability?
     ```
 
-34. Store as `blueprint.essential_capabilities[]`
+35. Store as `blueprint.essential_capabilities[]`
 
 ---
 
@@ -318,14 +322,16 @@
 **STEP 8: Non-Essential Capabilities**
 **═══════════════════════════════════════════════════════════════════**
 
-35. Transform foundation capabilities classified as `important` and `desired`:
+36. Transform foundation capabilities classified as `important` and `desired`:
     - `important[]` ← foundation capabilities with classification "important"
     - `desired[]` ← foundation capabilities with classification "desired"
     - Also consider: foundation.proactive_insights.differentiation_ideas as desired candidates
 
-36. Present grouped. Ask for confirmation.
+37. Include `details` for complex capabilities, same as Step 7.
 
-37. Store as `blueprint.non_essential_capabilities`
+38. Present grouped. Ask for confirmation.
+
+39. Store as `blueprint.non_essential_capabilities`
 
 ---
 

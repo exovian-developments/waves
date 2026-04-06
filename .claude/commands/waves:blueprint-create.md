@@ -140,11 +140,15 @@ Transform foundation's essential capabilities (only `classification = "essential
 
 **Progressive refinement:** Foundation's "The user can [action]" becomes more specific in the blueprint. Add scope boundaries, specify what the capability covers AND what it does not.
 
-Example:
-- Foundation: "The user can publish a project"
-- Blueprint: "The user can publish a project with title, description, budget range, location, category, and up to 10 photos. Published projects appear to contractors in the matching category within the geographic area."
+**Details for complex capabilities:** When a capability includes multiple concrete characteristics (e.g., a dashboard with specific metrics, an editor with specific features), add a `details` array listing each characteristic. If the capability is simple enough that the description says it all, omit `details`.
 
-Present. Ask owner: "Confirm? Add? Remove? Refine?"
+Example (simple — no details needed):
+- `{ "id": 1, "capability": "The user can authenticate via Magic Link email" }`
+
+Example (complex — details expand what the capability includes):
+- `{ "id": 5, "capability": "The user can see a dashboard with project progress and ecosystem health", "details": ["Progress bar per project from milestones achieved / total", "Per-wave progress breakdown", "Ecosystem average across all active projects", "Delivery velocity: milestones completed per week", "Filter by project name", "Version chips: production tag and main version"] }`
+
+Present. Ask owner: "Confirm? Add? Remove? Refine? Add details to any capability?"
 Store as `blueprint.essential_capabilities[]`.
 
 ## Step 8: Non-Essential Capabilities
@@ -153,7 +157,7 @@ Transform foundation capabilities classified as `important` and `desired`:
 - `important[]` ← foundation classification "important"
 - `desired[]` ← foundation classification "desired" + proactive_insights.differentiation_ideas
 
-Apply same progressive refinement as essential.
+Apply same progressive refinement as essential. Include `details` for complex capabilities.
 
 Present grouped. Ask for confirmation.
 Store as `blueprint.non_essential_capabilities`.
