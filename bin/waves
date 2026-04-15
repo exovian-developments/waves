@@ -566,6 +566,30 @@ cmd_upgrade() {
                 fi
             done
             echo -e "  ${GREEN}✓${NC} $cmd_count waves commands updated"
+
+            # Update hooks (Waves 2.0)
+            if [ -d "$data_dir/.claude/hooks" ]; then
+                mkdir -p .claude/hooks
+                local hook_count=0
+                for hook in "$data_dir/.claude/hooks/"*.sh; do
+                    if [ -f "$hook" ]; then
+                        cp "$hook" ".claude/hooks/$(basename "$hook")"
+                        chmod +x ".claude/hooks/$(basename "$hook")"
+                        hook_count=$((hook_count + 1))
+                    fi
+                done
+                echo -e "  ${GREEN}✓${NC} $hook_count hooks updated"
+            fi
+
+            # Update settings.json (only if not customized by user)
+            if [ -f "$data_dir/.claude/settings.json" ]; then
+                if [ ! -f ".claude/settings.json" ]; then
+                    cp "$data_dir/.claude/settings.json" ".claude/settings.json"
+                    echo -e "  ${GREEN}✓${NC} settings.json installed (hooks configuration)"
+                else
+                    echo -e "  ${CYAN}✓${NC} settings.json preserved (already exists)"
+                fi
+            fi
         fi
 
         # Show preserved artifacts
