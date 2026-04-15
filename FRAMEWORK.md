@@ -1,7 +1,7 @@
 # Waves™ Framework
 
-**Version:** 1.3.0
-**Last updated:** 2026-03-20
+**Version:** 2.0.0
+**Last updated:** 2026-04-15
 **Status:** Active
 
 ---
@@ -23,6 +23,21 @@ Kanban optimizes for the flow of individual items but lacks the strategic framin
 ### 1.3 Core insight
 
 AI agents have compressed what used to take 6 months of development into days or weeks. The bottleneck is no longer coding — it's human validation, QA, and decision-making. Waves adapts the process to this new reality.
+
+### 1.4 What changed in 2.0
+
+Waves 1.x was a framework of **structure and traceability** — it defined artifacts, order, and hierarchy. But it depended on CLAUDE.md instructions that degrade in long sessions.
+
+Waves 2.0 transforms the framework into a **Product Consciousness Framework** — the agent is no longer just an informed executor, it is a strategic advisor with graduated autonomy. The key additions:
+
+| Capability | Mechanism | Platform |
+|-----------|-----------|----------|
+| **Perception** — agent starts every session knowing the full product state | SessionStart hook reads the artifact graph and injects state | Claude Code (hooks), all platforms (prompt-based) |
+| **Mechanical enforcement** — rules that cannot be ignored | PreToolUse hook blocks actions (exit 2) when artifacts are missing | Claude Code only |
+| **Decision classification** — 5 levels of graduated autonomy | Classification reminder injected on every PreToolUse + re-injected after compaction | Claude Code (hooks), all platforms (CLAUDE.md) |
+| **Proactive metacognition** — 3 automatic triggers for strategic reflection | PostToolUse hooks detect delta in objectives, blueprint changes, and phase completion | Claude Code only |
+| **Context survival** — rules survive long sessions | SessionStart re-fires after context compaction, re-injecting state and classification rules | Claude Code only |
+| **Graduated governance** — enforcement proportional to project maturity | No blueprint → allow all. Blueprint without roadmap → block. Full artifacts → allow + classify | Claude Code only |
 
 ---
 
@@ -661,6 +676,11 @@ Some roadmaps orchestrate work across multiple repositories (e.g., extracting sh
 | Scaling | SAFe, LeSS, Nexus | Multiple overlapping waves per product area |
 | Velocity metric | Story points per sprint | Wave throughput (capabilities delivered per wave) |
 | Progress tracking | Burndown charts | Milestones achieved / total (per wave and global) |
+| Rule enforcement | Social agreement (degrades over time) | Executable hooks (cannot be ignored) |
+| Decision classification | None — all decisions treated equally | 5 levels with graduated autonomy |
+| AI agent awareness | None — agents start every session blind | Full product state injected at session start |
+| Context survival | N/A | Auto re-injection after compaction |
+| Strategic metacognition | Retrospective (end of sprint, forensic) | Real-time: on objective completion, blueprint change, phase completion |
 
 ---
 
@@ -673,10 +693,103 @@ Some roadmaps orchestrate work across multiple repositories (e.g., extracting sh
 5. **Variable over fixed.** A wave lasts as long as it needs. No artificial boundaries, no wasted ceremony.
 6. **Celebration over forensics.** Wave closures recognize achievement first, then note improvements constructively.
 7. **Blueprint as living document.** The product evolves through controlled change, not frozen specs or uncontrolled drift.
+8. **Enforcement over instruction.** Rules that can be ignored will be ignored. Hooks enforce the framework with code, not prose.
 
 ---
 
-## 12. Glossary
+## 12. Decision Classification (Waves 2.0)
+
+The agent classifies its own decisions in real-time. Classification is reinforced by injection on every PreToolUse event (Claude Code) or via CLAUDE.md instructions (all platforms).
+
+| Level | Type | Agent action |
+|-------|------|-------------|
+| **1** | Mechanical implementation (naming, formatting) | Full autonomy. Proceeds silently. |
+| **2** | Technical implementation (pattern, module structure) | Autonomy with logbook documentation. |
+| **3** | Scope decision (outside current objective's scope) | **STOPS.** Informs user. Waits for approval. |
+| **4** | Business decision (affects a blueprint capability) | **STOPS.** Projects scenarios with tradeoffs. Waits. |
+| **5** | Discovery (solution with independent market value) | **STOPS.** Documents. Projects value. Advises. |
+
+**The trust contract:** When in doubt, the agent classifies **UP** (more caution), never down. This conservative bias is by design — it ensures the human retains authority over decisions that matter.
+
+Classification was validated with 18 benchmark scenarios across all 5 levels: 100% correct actions, 89% exact level match, with the 2 deviations both classifying conservatively upward.
+
+### 12.1 Mixed-level scenarios (escalation)
+
+During execution, a task can escalate from one level to another. For example:
+- A variable rename (level 1) may reveal cross-script dependencies (level 3)
+- A bug fix (level 2) may uncover a schema ambiguity that contradicts a design principle (level 4)
+- A helper function (level 2) may become a general-purpose tool with market value (level 5)
+
+The agent must detect these escalations and re-classify. This was validated with 3 mixed scenarios — all escalations were detected correctly.
+
+---
+
+## 13. Hooks Architecture (Waves 2.0, Claude Code)
+
+Waves 2.0 uses Claude Code hooks — bash scripts that execute obligatorily at lifecycle events. These are not suggestions; they are code that runs before, during, or after every agent action.
+
+### 13.1 Hook inventory
+
+| Hook | Event | Purpose | Output |
+|------|-------|---------|--------|
+| `waves-perceive.sh` | SessionStart | Read artifact graph, inject product state | Plain text context |
+| `waves-gate.sh` | PreToolUse (Edit\|Write\|Bash) | Graduated enforcement + classification reminder | exit 0 (allow) or exit 2 (block) + stderr message |
+| `waves-doc-enforce.sh` | PostToolUse (Edit\|Write) | Ensure recent_context when objectives complete | additionalContext alert |
+| `waves-metacognition.sh` | PostToolUse (Edit\|Write) | Force reflection when primary objective completes | additionalContext with 5 reflection questions |
+| `waves-blueprint-impact.sh` | PostToolUse (Edit\|Write) | Project cascading impacts when blueprint changes | additionalContext with impact analysis prompt |
+| `waves-phase-audit.sh` | PostToolUse (Edit\|Write) | Strategic audit when roadmap phase completes | additionalContext with 7-dimension audit prompt |
+| `waves-dart-analyze.sh` | PostToolUse (Edit\|Write) | Run dart analyze on .dart files | additionalContext with analysis results |
+
+### 13.2 Graduated enforcement logic
+
+```
+Does blueprint.json exist?
+├── NO → Allow everything. Project is in shaping phase.
+│
+└── YES → Waves enforcement activates.
+    │
+    ├── Does an active roadmap exist?
+    │   ├── NO → BLOCK. "Create a roadmap before implementing."
+    │   └── YES →
+    │       ├── Does a logbook exist?
+    │       │   ├── NO → BLOCK. "Create a logbook for this task."
+    │       │   └── YES → ALLOW + inject classification reminder
+    │       └──
+    └──
+```
+
+### 13.3 Metacognition triggers
+
+| Trigger | When | What the agent must do |
+|---------|------|----------------------|
+| **Objective completed** | Main objective status changes to "achieved" | Read blueprint, roadmap, all active logbooks. Share 5 reflections with user before continuing. |
+| **Blueprint changed** | Any edit to blueprint.json | Project cascading impacts: affected phases, misaligned objectives, invalidated decisions, at-risk logbooks. |
+| **Phase completed** | Phase status changes to "completed" in roadmap | Full strategic audit: phase summary, blueprint alignment, discoveries, risks, opportunities, recommendations. |
+
+### 13.4 Delta detection
+
+PostToolUse hooks use marker files in `/tmp/waves-*/` to detect state changes:
+1. On first run, the hook counts completed objectives (or phases) and stores the count in a marker file.
+2. On subsequent runs, it compares the current count with the stored count.
+3. If the count increased, a trigger fires.
+
+This approach is stateless (no database), fast (<1ms for non-matching files), and resilient (marker files are per-session, automatically cleaned on reboot).
+
+### 13.5 Platform availability
+
+| Feature | Claude Code | Claude Desktop (Plugin) | Codex / Gemini CLI |
+|---------|-------------|------------------------|-------------------|
+| Perception (state injection) | Hook (mechanical) | Prompt (degradable) | CLAUDE.md (degradable) |
+| Enforcement (blocking) | Hook (exit 2, non-bypassable) | Not available | Not available |
+| Classification reminder | Hook (re-injected every action) | Prompt (session start only) | CLAUDE.md (degradable) |
+| Metacognition triggers | Hook (automatic on delta) | Not available | Not available |
+| Context survival (post-compaction) | Hook (automatic re-injection) | Not available | Not available |
+| Artifact structure | Schema-validated JSON | Schema-validated JSON | Schema-validated JSON |
+| Commands | Slash commands | Slash commands | Manual prompts |
+
+---
+
+## 14. Glossary
 
 | Term | Definition |
 |------|-----------|
@@ -698,6 +811,13 @@ Some roadmaps orchestrate work across multiple repositories (e.g., extracting sh
 | **QA** | QA & Demo. Validation gate for production approval. |
 | **HC** | Health Check. Team wellbeing assessment based on Spotify model. |
 | **WC** | Wave Celebration. Positive closure with recognition, learning, and launch. |
+| **Hook** | Bash script that executes obligatorily at a Claude Code lifecycle event. Cannot be bypassed by the agent. |
+| **Perception** | The act of reading the artifact graph and injecting product state at session start. |
+| **Enforcement** | Mechanical blocking of actions when required artifacts are missing. Uses exit 2 in hooks. |
+| **Classification** | The 5-level system for categorizing agent decisions by impact. Levels 1-2 proceed; 3+ stop. |
+| **Metacognition** | Proactive reflection triggered automatically when objectives complete, blueprints change, or phases finish. |
+| **Marker file** | Temporary file in /tmp/ used by hooks to detect state changes (delta detection) between tool calls. |
+| **Graduated governance** | Enforcement that scales with project maturity: no blueprint → permissive; blueprint → enforced. |
 
 ---
 
@@ -707,4 +827,4 @@ Some roadmaps orchestrate work across multiple repositories (e.g., extracting sh
 
 ---
 
-*Waves™ Framework v1.3.0 — Created 2026-03-16, updated 2026-03-20 by Exovian™ Developments*
+*Waves™ Framework v2.0.0 — Created 2026-03-16, updated 2026-04-15 by Exovian™ Developments*

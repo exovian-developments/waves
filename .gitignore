@@ -1,6 +1,8 @@
-# Claude Code (keep .claude/commands/ tracked — distributed with waves)
+# Claude Code (keep commands, hooks, and settings tracked — distributed with waves)
 .claude/*
 !.claude/commands/
+!.claude/hooks/
+!.claude/settings.json
 
 # Build artifacts
 *.plugin

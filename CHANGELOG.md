@@ -5,6 +5,53 @@ All notable changes to waves will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-04-15
+
+### Added
+
+- **Waves 2.0: Product Consciousness Framework** — transforms the agent from an informed executor into a strategic advisor with graduated autonomy
+
+- **7 Claude Code hooks** (`.claude/hooks/`)
+  - `waves-perceive.sh` — SessionStart: injects full product state (wave, phase, objectives, decisions)
+  - `waves-gate.sh` — PreToolUse: graduated enforcement (no blueprint → allow; blueprint without roadmap → block; full artifacts → allow + classification reminder)
+  - `waves-doc-enforce.sh` — PostToolUse: enforces recent_context documentation when objectives complete
+  - `waves-metacognition.sh` — PostToolUse: triggers holistic reflection when primary objectives complete
+  - `waves-blueprint-impact.sh` — PostToolUse: projects cascading impacts when blueprint changes
+  - `waves-phase-audit.sh` — PostToolUse: strategic audit when roadmap phases complete
+  - `waves-dart-analyze.sh` — PostToolUse: runs dart analyze on .dart files after edits
+
+- **Decision Classification** — 5-level system for graduated autonomy
+  - Level 1-2 (technical): agent proceeds autonomously
+  - Level 3 (scope): agent stops, informs, waits
+  - Level 4 (business): agent stops, projects scenarios, waits
+  - Level 5 (discovery): agent stops, documents, projects, advises
+  - Conservative bias: when in doubt, classify UP
+
+- **Hook settings** (`.claude/settings.json`) — SessionStart, PreToolUse, PostToolUse configuration with matchers and timeouts
+
+- **Sections 12-13 in FRAMEWORK.md** — Decision Classification and Hooks Architecture with platform availability matrix
+
+- **Principle #8** — "Enforcement over instruction. Rules that can be ignored will be ignored."
+
+- **5 new rows in Scrum comparison** — enforcement, classification, awareness, context survival, metacognition
+
+- **8 new glossary terms** — hook, perception, enforcement, classification, metacognition, marker file, graduated governance
+
+### Changed
+
+- **FRAMEWORK.md** bumped to v2.0.0
+- **Agent Operating Protocol** (project-init) updated with decision classification table, metacognition checkpoints, and 2 new agent qualities
+- **Plugin hooks.json** updated with expanded perception and classification prompt for Claude Desktop/Cowork
+- **bin/waves** version bumped to 2.0.0
+
+### Validated
+
+- 29/29 automated tests passed: 11 hook dry-run tests + 18 classification benchmark scenarios
+- Classification accuracy: 100% correct actions, 89% exact level match, 2 conservative deviations (classified UP)
+- All 3 mixed-level escalation scenarios detected correctly
+
+---
+
 ## [1.3.0] - 2026-03-19
 
 ### Added

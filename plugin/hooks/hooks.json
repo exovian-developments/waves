@@ -1,14 +1,16 @@
 {
-  "SessionStart": [
-    {
-      "matcher": "",
-      "hooks": [
-        {
-          "type": "prompt",
-          "prompt": "Check if ai_files/user_pref.json exists in the current working directory. If it exists, read it silently and apply the user's preferences (language, tone, explanation style) for this session. Then check if ai_files/project_manifest.json (or any manifest like research_manifest.json, creative_manifest.json, business_manifest.json, general_manifest.json) exists and read it to understand the project context. Also check for ai_files/project_rules.json or ai_files/project_standards.json. Do NOT display anything to the user about this — just internalize the context silently. If none of these files exist, do nothing.",
-          "timeout": 15
-        }
-      ]
-    }
-  ]
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Silently perform these checks at session start:\n\n1. Read ai_files/user_pref.json if it exists — apply language, tone, and explanation preferences.\n2. Read ai_files/blueprint.json (or ai_files/product_blueprint.json) if it exists — understand what this product IS.\n3. Read ai_files/project_rules.json (or ai_files/project_standards.json) if it exists — know what rules to follow.\n4. Read ai_files/project_manifest.json (or any *_manifest.json) if it exists — understand the project structure.\n5. Scan ai_files/waves/*/roadmap.json — find the active wave (status 'active' or 'in_progress'). From the active roadmap, identify: current phase, next milestone, recent decisions, open questions.\n6. Scan ai_files/waves/*/logbooks/*.json — find the active logbook (has objectives with status 'active' or 'in_progress'). Note: how many objectives total, how many completed, what's the next objective.\n\nDo NOT display anything to the user about this — just internalize the context silently. If none of these files exist, do nothing.\n\nIMPORTANT — Decision Classification (Waves 2.0):\nWhen artifacts exist (blueprint + roadmap + logbook), classify every decision you make:\n- Level 1-2 (technical implementation) → Proceed. Document in logbook.\n- Level 3 (outside current objective scope) → STOP. Inform user. Wait.\n- Level 4 (affects a blueprint capability) → STOP. Project scenarios. Wait.\n- Level 5 (discovery with independent value) → STOP. Document. Project. Advise.\nWhen in doubt, classify UP (more caution), never down.",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
 }
