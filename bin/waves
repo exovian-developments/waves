@@ -11,7 +11,7 @@
 
 set -e
 
-VERSION="2.0.5"
+VERSION="2.0.6"
 
 # Colors for output
 RED='\033[0;31m'
@@ -448,13 +448,16 @@ cmd_init() {
 
 # Upgrade command - updates global installation + local project
 cmd_upgrade() {
-    show_banner
+    local skip_brew=false
+    [ "${1:-}" = "--skip-brew" ] && skip_brew=true
+
+    $skip_brew || show_banner
 
     local old_version="$VERSION"
     local upgraded=false
 
     # Step 1: Upgrade global installation
-    if command -v brew &> /dev/null; then
+    if ! $skip_brew && command -v brew &> /dev/null; then
         local brew_prefix
         brew_prefix="$(brew --prefix 2>/dev/null)"
 
@@ -475,10 +478,11 @@ cmd_upgrade() {
                 if [ -f "$new_bin" ]; then
                     local new_version
                     new_version=$(grep '^VERSION=' "$new_bin" 2>/dev/null | head -1 | cut -d'"' -f2)
-                    if [ -n "$new_version" ]; then
+                    if [ -n "$new_version" ] && [ "$new_version" != "$old_version" ]; then
                         echo -e "  ${GREEN}✓${NC} Upgraded ${YELLOW}v${old_version}${NC} → ${GREEN}v${new_version}${NC}"
-                        VERSION="$new_version"
-                        upgraded=true
+                        # Re-exec with the new binary so new logic takes effect
+                        echo ""
+                        exec "$new_bin" upgrade --skip-brew
                     fi
                 fi
             else
@@ -643,7 +647,7 @@ main() {
             cmd_init "$2"
             ;;
         update|upgrade)
-            cmd_upgrade
+            cmd_upgrade "$2"
             ;;
         --version|-v)
             show_version
