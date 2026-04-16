@@ -59,7 +59,7 @@ echo "$CONTEXT_ENTRIES" > "$MARKER_FILE.context"
 
 # If completed count grew but context count didn't, documentation is missing
 if [ "$COMPLETED" -gt "$LAST_COMPLETED" ] && [ "$CONTEXT_ENTRIES" -le "$LAST_CONTEXT" ]; then
-  MSG="ENFORCEMENT: Marcaste objetivos como completados pero no agregaste una entrada en recent_context. Cada grupo de objetivos completados DEBE tener su contexto documentado — es la base para las proyecciones futuras y la continuidad entre sesiones. Agrega una entrada en recent_context describiendo qué se hizo y qué se aprendió."
+  MSG="ENFORCEMENT: You marked objectives as completed but did not add a recent_context entry. Every group of completed objectives MUST have its context documented — it is the foundation for future projections and session continuity. Add a recent_context entry describing what was done and what was learned."
   jq -n --arg ctx "$MSG" '{"additionalContext": $ctx}'
   exit 0
 fi

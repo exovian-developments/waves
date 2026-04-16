@@ -58,7 +58,7 @@ for roadmap in "$AI_FILES"/waves/*/roadmap.json; do
 done
 
 if [ "$ROADMAP_EXISTS" = false ]; then
-  echo "Waves: Este proyecto tiene blueprint pero no tiene roadmap. Crea uno antes de implementar: /waves:roadmap-create" >&2
+  echo "Waves: This project has a blueprint but no roadmap. Create one before implementing: /waves:roadmap-create" >&2
   exit 2
 fi
 
@@ -72,11 +72,11 @@ for logbook in "$AI_FILES"/waves/*/logbooks/*.json; do
 done
 
 if [ "$LOGBOOK_EXISTS" = false ]; then
-  echo "Waves: Este proyecto tiene blueprint y roadmap pero no tiene bitácora. Crea una para tu tarea: /waves:logbook-create" >&2
+  echo "Waves: This project has a blueprint and roadmap but no logbook. Create one for your task: /waves:logbook-create" >&2
   exit 2
 fi
 
 # --- All artifacts present: allow + inject classification reminder ---
-REMINDER="CLASIFICA tu decisión antes de actuar:\n- Nivel 1-2 (implementación técnica) → Procede. Documenta en bitácora.\n- Nivel 3 (fuera del scope del objetivo) → PARA. Consulta al usuario.\n- Nivel 4 (afecta una capacidad del blueprint) → PARA. Presenta escenarios.\n- Nivel 5 (descubrimiento con valor propio) → PARA. Proyecta y asesora."
+REMINDER="CLASSIFY your decision before acting:\n- Level 1-2 (technical implementation) → Proceed. Document in logbook.\n- Level 3 (outside objective scope) → STOP. Inform user.\n- Level 4 (affects blueprint capability) → STOP. Project scenarios.\n- Level 5 (discovery with independent value) → STOP. Document. Advise."
 
 jq -n --arg ctx "$REMINDER" '{"additionalContext": $ctx}'

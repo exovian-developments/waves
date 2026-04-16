@@ -48,7 +48,7 @@ fi
 # If no blueprint, return minimal context or nothing
 if [ "$BLUEPRINT_EXISTS" = false ]; then
   if [ -f "$AI_FILES/feasibility.json" ] || [ -f "$AI_FILES/foundation.json" ]; then
-    printf "ESTADO WAVES:\n- Proyecto en fase de validación (sin blueprint aún)\n- Artefactos detectados: feasibility/foundation\n- El framework permite libertad total en esta fase\n"
+    printf "WAVES STATE:\n- Project in validation phase (no blueprint yet)\n- Artifacts detected: feasibility/foundation\n- Framework allows full freedom in this phase\n"
   fi
   exit 0
 fi
@@ -128,33 +128,33 @@ done
 
 # --- Build & Output Plain Text ---
 # Claude Code injects non-JSON stdout as context when hook exits 0
-printf "ESTADO WAVES:\n"
-printf -- "- Producto: %s (%s)\n" "${PRODUCT_NAME:-desconocido}" "${PRODUCT_CODENAME:-sin codename}"
+printf "WAVES STATE:\n"
+printf -- "- Product: %s (%s)\n" "${PRODUCT_NAME:-unknown}" "${PRODUCT_CODENAME:-no codename}"
 
 if [ -n "$ACTIVE_WAVE" ]; then
-  printf -- "- Wave activa: %s\n" "$ACTIVE_WAVE"
-  printf -- "- Fase actual: %s — %s (%s)\n" "${ACTIVE_PHASE_ID:-?}" "${ACTIVE_PHASE_NAME:-sin nombre}" "${ACTIVE_PHASE_STATUS:-?}"
-  printf -- "- Progreso: %s/%s milestones\n" "$ACHIEVED_MILESTONES" "$TOTAL_MILESTONES"
+  printf -- "- Active wave: %s\n" "$ACTIVE_WAVE"
+  printf -- "- Current phase: %s — %s (%s)\n" "${ACTIVE_PHASE_ID:-?}" "${ACTIVE_PHASE_NAME:-unnamed}" "${ACTIVE_PHASE_STATUS:-?}"
+  printf -- "- Progress: %s/%s milestones\n" "$ACHIEVED_MILESTONES" "$TOTAL_MILESTONES"
 
   if [ -n "$ACTIVE_LOGBOOK" ]; then
-    printf -- "- Bitácora activa: %s (%s/%s objetivos)\n" "$ACTIVE_LOGBOOK" "$LOGBOOK_OBJECTIVES_DONE" "$LOGBOOK_OBJECTIVES_TOTAL"
-    printf -- "- Siguiente objetivo: %s\n" "$NEXT_OBJECTIVE"
+    printf -- "- Active logbook: %s (%s/%s objectives)\n" "$ACTIVE_LOGBOOK" "$LOGBOOK_OBJECTIVES_DONE" "$LOGBOOK_OBJECTIVES_TOTAL"
+    printf -- "- Next objective: %s\n" "$NEXT_OBJECTIVE"
   else
-    printf -- "- Sin bitácora activa en %s\n" "$ACTIVE_WAVE"
+    printf -- "- No active logbook in %s\n" "$ACTIVE_WAVE"
   fi
 
   if [ "$OPEN_QUESTIONS" -gt 0 ]; then
-    printf -- "- Preguntas abiertas: %s\n" "$OPEN_QUESTIONS"
+    printf -- "- Open questions: %s\n" "$OPEN_QUESTIONS"
   fi
 
   if [ -n "$RECENT_DECISIONS" ]; then
-    printf -- "- Decisiones recientes: %s\n" "$RECENT_DECISIONS"
+    printf -- "- Recent decisions: %s\n" "$RECENT_DECISIONS"
   fi
 else
-  printf -- "- Sin wave activa detectada\n"
+  printf -- "- No active wave detected\n"
 fi
 
-# --- CARGAR: paths for the prompt hook to read ---
+# --- LOAD: paths for the prompt hook to read ---
 LOAD_FILES=""
 
 # All active roadmaps
@@ -171,5 +171,5 @@ if [ -n "$ACTIVE_LOGBOOK_PATH" ]; then
 fi
 
 if [ -n "$LOAD_FILES" ]; then
-  printf "\nCARGAR:%b\n" "$LOAD_FILES"
+  printf "\nLOAD:%b\n" "$LOAD_FILES"
 fi
