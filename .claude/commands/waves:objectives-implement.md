@@ -631,6 +631,23 @@ Progress saved. Resume with:
 
 ## Final Summary
 
+**MANDATORY: Before showing the summary, update the roadmap.**
+
+Find the roadmap for the same wave as this logbook (`ai_files/waves/[wN]/roadmap.json`).
+Add a `decisions` entry recording the session outcome:
+
+```json
+{
+  "id": [next_id],
+  "created_at": "[now UTC]",
+  "decision": "[AUTO] Session ended for [logbook]: [X] objectives completed this session, [Y]/[Z] total. Stop reason: [reason]. Next pending: [objective description or 'none']."
+}
+```
+
+If ALL objectives in the logbook are complete, also check if the associated milestone in the roadmap should be updated to "completed".
+
+Then show the summary:
+
 ```
 ✅ Implementation session complete!
 
@@ -643,6 +660,7 @@ Progress saved. Resume with:
   • Stop reason: [all done | context limit | impediment]
 
 📋 Logbook: ai_files/waves/[wN]/logbooks/[filename]
+📋 Roadmap updated: ai_files/waves/[wN]/roadmap.json
 
 [If objectives remain:]
 🎯 Next pending objective: [next_objective.id]: [content]

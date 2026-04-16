@@ -42,6 +42,55 @@ TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 
+# --- Metacognition pending: block until delegation is complete ---
+# If a primary objective was just completed, the agent must delegate
+# metacognition to a background subagent before continuing.
+# The Agent tool is NOT in the Edit|Write|Bash matcher, so spawning
+# the subagent is allowed. Writing to ai_files/ is whitelisted.
+# Auto-expire after 5 minutes to prevent stuck markers.
+PENDING_FILE="/tmp/waves-metacognition-pending"
+if [ -f "$PENDING_FILE" ]; then
+  # Auto-expire: if marker is older than 5 minutes, clear it
+  if [ "$(uname)" = "Darwin" ]; then
+    MARKER_AGE=$(( $(date +%s) - $(stat -f %m "$PENDING_FILE") ))
+  else
+    MARKER_AGE=$(( $(date +%s) - $(stat -c %Y "$PENDING_FILE") ))
+  fi
+  if [ "$MARKER_AGE" -gt 300 ]; then
+    rm -f "$PENDING_FILE"
+  fi
+fi
+if [ -f "$PENDING_FILE" ]; then
+  # Allow ai_files/ writes (to update logbook with "delegated" note)
+  if [ "$TOOL_NAME" = "Edit" ] || [ "$TOOL_NAME" = "Write" ]; then
+    FILE_PATH_CHECK=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
+    if [[ "$FILE_PATH_CHECK" == */ai_files/* ]] || [[ "$FILE_PATH_CHECK" == ai_files/* ]]; then
+      echo '{}'
+      exit 0
+    fi
+  fi
+  # Allow read-only Bash + marker cleanup
+  if [ "$TOOL_NAME" = "Bash" ]; then
+    COMMAND_CHECK=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
+    FIRST_CHECK=$(echo "$COMMAND_CHECK" | head -1 | sed 's/^[[:space:]]*//' | cut -d' ' -f1)
+    case "$FIRST_CHECK" in
+      ls|cat|head|tail|grep|rg|find|tree|git|wc|echo|pwd)
+        echo '{}'
+        exit 0
+        ;;
+      rm)
+        # Allow clearing stuck markers
+        if echo "$COMMAND_CHECK" | grep -q '/tmp/waves-' 2>/dev/null; then
+          echo '{}'
+          exit 0
+        fi
+        ;;
+    esac
+  fi
+  echo "Waves: Metacognition pending. Delegate analysis to a background subagent (Agent tool with run_in_background=true), then update the logbook with 'metacognition: delegated'. The gate will unblock after that." >&2
+  exit 2
+fi
+
 # --- Consent bypass: .claude/waves-gate-bypass disables blocking ---
 # For projects in transition (1.x → 2.0) or working without full artifacts.
 # The user creates this file explicitly to opt out of blocking.

@@ -55,16 +55,32 @@ if [ "$PHASES_COMPLETED" -gt "$LAST_COUNT" ]; then
   PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
   AI_FILES="$PROJECT_DIR/ai_files"
 
-  # List logbooks in this wave
-  LOGBOOK_LIST=""
-  if [ -d "$AI_FILES/waves/$WAVE/logbooks" ]; then
-    for lb in "$AI_FILES/waves/$WAVE/logbooks/"*.json; do
-      [ -f "$lb" ] || continue
-      LOGBOOK_LIST="$LOGBOOK_LIST\n- $(basename "$lb")"
-    done
-  fi
+  # Write pending marker — gate blocks until delegation
+  echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "/tmp/waves-metacognition-pending"
 
-  MSG="ROADMAP PHASE COMPLETED — MANDATORY STRATEGIC AUDIT\n\nA roadmap phase was completed ($WAVE). Perform a full strategic analysis.\n\nRead:\n1. ai_files/blueprint.json — the complete product\n2. $FILE — the completed phase and the ones ahead\n3. All logbooks from the completed phase:$LOGBOOK_LIST\n4. All accumulated recent_context entries\n5. Decisions recorded in the roadmap\n\nProduce an analysis that includes:\n- Phase summary: milestones achieved, objectives resolved, decisions made\n- Blueprint alignment: which capabilities advanced?\n- Discoveries: patterns, tools, or solutions that emerged with independent value\n- Risks for the next phase: dependencies, blockers, assumptions that could fail\n- Opportunities detected: is anything from this phase replicable or commercializable?\n- Recommendations: what should be adjusted before starting the next phase?\n- Open questions: is there anything unresolved that affects what comes next?\n\nBe specific and reference artifacts by ID/name."
+  # Find blueprint
+  BP=""
+  for bp in "$AI_FILES/blueprint.json" "$AI_FILES/product_blueprint.json"; do
+    [ -f "$bp" ] && BP="$bp" && break
+  done
+
+  # ALL roadmaps (not just this wave — other waves may be affected)
+  ALL_ROADMAPS=""
+  for rm in "$AI_FILES"/waves/*/roadmap.json; do
+    [ -f "$rm" ] || continue
+    ALL_ROADMAPS="$ALL_ROADMAPS\n- $rm"
+  done
+  ROADMAPS_PATHS=$(echo -e "$ALL_ROADMAPS" | grep -v '^$')
+
+  # ALL logbooks (not just this wave)
+  ALL_LOGBOOKS=""
+  for lb in "$AI_FILES"/waves/*/logbooks/*.json; do
+    [ -f "$lb" ] || continue
+    ALL_LOGBOOKS="$ALL_LOGBOOKS\n- $lb"
+  done
+  LOGBOOKS_PATHS=$(echo -e "$ALL_LOGBOOKS" | grep -v '^$')
+
+  MSG="METACOGNITION TRIGGERED — Roadmap phase completed ($WAVE).\n\nYou may still update Waves artifacts (logbooks, resolutions) — those are not blocked. Finish any pending artifact updates FIRST.\n\nOnce all artifact updates are done, you are BLOCKED from code changes until you:\n1. Spawn a background Agent (run_in_background=true, model=sonnet) with the prompt below\n2. Update the active logbook recent_context with 'metacognition: phase audit delegated'\n\nThe gate will unblock after step 2. Continue working — the subagent analyzes in parallel.\n\nWhen the subagent returns:\n- If CRITICAL findings → classify as Level 4+, STOP, present to user immediately\n- If no critical findings → note in logbook and continue\n\n--- SUBAGENT PROMPT (use exactly as the prompt parameter) ---\nYou are a strategic advisor performing a phase completion audit for a product that uses the Waves framework.\n\nCONTEXT: Phase in wave '$WAVE' was just completed. This is a natural checkpoint — the team is about to start the next phase. Your job is to ensure the next phase starts on solid ground.\n\nREAD THESE FILES (all of them, completely):\n\nBlueprint:\n- ${BP:-not found}\n\nRoadmaps (the completed phase is in $FILE, but read ALL for cross-wave impact):\n$ROADMAPS_PATHS\n\nLogbooks (read each one):\n$LOGBOOKS_PATHS\n\nAfter reading, perform a strategic audit:\n\n1. READINESS CHECK FOR NEXT PHASE — Look at the next phase's milestones and objectives:\n   - Does the project have all prerequisites to start? (Infrastructure, accounts, credentials, APIs, design assets, legal requirements)\n   - Are there decisions from the completed phase that MUST be resolved before proceeding?\n   - Are there logbook objectives that were abandoned or left incomplete that the next phase depends on?\n   - Are there ambiguities in the next phase's milestones that will cause confusion during implementation?\n\n2. BLUEPRINT ALIGNMENT — Compare what was accomplished with what the blueprint promises:\n   - Which blueprint capabilities advanced during this phase?\n   - Are any capabilities falling behind or being implemented differently than designed?\n   - Do the design principles still hold, or has the implementation revealed they need revision?\n   - Is the product hypothesis still supported by the direction of implementation?\n\n3. STRATEGIC OPPORTUNITIES — Think about the big picture:\n   - Can upcoming phases be reordered to reduce dependencies or enable parallel work?\n   - Did this phase produce something reusable (a pattern, library, or tool) that saves effort later?\n   - Is there a faster path to validating the product hypothesis than what the roadmap currently plans?\n   - Should any planned capabilities be descoped based on what was learned?\n\nRESPONSE FORMAT:\n- If you find ANY critical findings: start with CRITICAL: then list each with phase numbers, capability IDs, and objective IDs. State what's at risk and what action is needed.\n- If no critical findings: respond with exactly 'No critical findings. Phase $WAVE audit complete.' and nothing else.\n\nBe specific and actionable. Under 400 words.\n--- END SUBAGENT PROMPT ---"
 
   jq -n --arg ctx "$MSG" '{"additionalContext": $ctx}'
   exit 0

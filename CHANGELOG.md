@@ -5,6 +5,23 @@ All notable changes to waves will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-04-16
+
+### Added
+
+- **Background metacognition via subagents** — all three metacognition triggers (objective completed, blueprint changed, phase completed) now delegate analysis to a background subagent. The main thread pauses ~5 seconds (spawn + logbook note), then continues. The subagent analyzes in parallel and only interrupts if it finds critical findings (Level 4+).
+- **Mechanical roadmap progress** — when a primary objective completes, the hook writes an [AUTO] progress note directly to the roadmap's decisions array with objective completion state (e.g., "main 1/2, secondary 3/5"). Ensures the roadmap always reflects reality even when logbooks are abandoned.
+- **objectives-implement roadmap update** — the command now mandates updating the roadmap with a session progress entry before showing the final summary. Captures what was accomplished even when sessions end early.
+- **Metacognition marker auto-expire** — pending markers expire after 5 minutes to prevent stuck states. `rm /tmp/waves-*` is also whitelisted in the gate.
+- **Expert advisor subagent prompts** — all three metacognition subagents now receive full business context (blueprint + ALL roadmaps + ALL logbooks as readable paths) and analyze for blockers (missing prerequisites, info gaps), design improvements (undiscovered dependencies, misalignments), and effort savings (services, reordering, descoping).
+
+### Changed
+
+- **Debounce for cascading updates** — metacognition messages now tell the agent to finish all artifact updates (roadmap, logbooks) BEFORE delegating the subagent. ai_files/ writes are whitelisted during the pending state, so the agent updates the roadmap with fresh data before the subagent reads it.
+- **Subagent model** — metacognition subagents use Sonnet for cost efficiency (analysis, not code generation).
+
+---
+
 ## [2.0.9] - 2026-04-16
 
 ### Fixed
