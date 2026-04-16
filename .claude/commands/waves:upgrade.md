@@ -1,8 +1,81 @@
-# /waves:upgrade — Update Agent Operating Protocol in CLAUDE.md
+# /waves:upgrade — Complete the Waves upgrade after running `waves upgrade` in terminal
 
-You are upgrading the Waves Agent Operating Protocol in this project's CLAUDE.md to the latest version.
+You are completing a Waves upgrade. The terminal command already updated schemas, commands, hooks, and settings. Your job is to update what requires intelligence: CLAUDE.md and user preferences.
 
-## Instructions
+## Step 1: Read current state
+
+1. Read `ai_files/user_pref.json` (or `user_pref.json`). Extract `preferred_language`. If not found, use English.
+2. Read `CLAUDE.md` if it exists.
+
+**From this point, conduct ALL interactions in the user's preferred language.**
+
+## Step 2: Show What's New
+
+Display this narrative summary (translate to user's language):
+
+```
+=== Waves 2.1 — What's New ===
+
+Your AI agent just got smarter about your business.
+
+1. BACKGROUND METACOGNITION
+   When you complete a primary objective, modify your blueprint, or finish a
+   roadmap phase, Waves now automatically launches a background analysis.
+   A second agent reads your entire project snapshot (blueprint, roadmaps,
+   logbooks) and looks for three things:
+   - Blockers: missing prerequisites that will prevent upcoming work
+   - Design improvements: things your plan doesn't contemplate but should
+   - Effort savings: faster paths to your product's mission
+   You keep working. If the analysis finds something critical, you'll be
+   alerted. If not, it's noted silently and you continue uninterrupted.
+
+2. MECHANICAL ROADMAP PROGRESS
+   Your roadmap now automatically receives progress notes when primary
+   objectives complete — even if you never finish the logbook. If priorities
+   shift and you abandon a logbook, the roadmap still knows exactly how far
+   you got (e.g., "main 2/3, secondary 4/7"). No more silent gaps.
+
+3. SMARTER GATE
+   The gate no longer blocks you from reading code, running git commands,
+   or creating Waves artifacts. It only blocks source code changes when
+   you don't have a logbook. And if you need to bypass it temporarily,
+   you can: touch .claude/waves-gate-bypass
+
+4. SESSION AWARENESS
+   Every session starts with your agent reading the full blueprint, active
+   roadmaps, active logbooks, rules, and manifest — automatically. No more
+   "what project is this?" at the start of every conversation.
+
+===
+```
+
+## Step 3: Configuration questions (only if settings are missing)
+
+Read `ai_files/user_pref.json` and check for missing settings. ONLY ask questions for settings that don't exist yet. If all settings exist, skip to Step 4.
+
+### Check: agent_config.metacognition_model
+
+IF `agent_config.metacognition_model` does NOT exist in user_pref.json:
+
+```
+NEW SETTING: Metacognition Model
+
+The background analysis that runs after objectives, blueprint changes,
+and phase completions uses a separate AI model. You can choose which one:
+
+  opus   — Deepest analysis. Best for complex products with many
+           capabilities and dependencies. (recommended)
+  sonnet — Good balance of speed and depth. Works well for most projects.
+  haiku  — Fastest and lightest. Basic checks only.
+
+Which model for metacognition? (opus/sonnet/haiku) [default: opus]:
+```
+
+Store the answer as `agent_config.metacognition_model` in user_pref.json. If user presses Enter or says "default", store "opus".
+
+IF the setting already exists, do NOT ask. Just note it in the summary.
+
+## Step 4: Update CLAUDE.md
 
 1. Read `CLAUDE.md` in the project root.
 
@@ -11,17 +84,34 @@ You are upgrading the Waves Agent Operating Protocol in this project's CLAUDE.md
 3. IF FOUND:
    - Identify where the Waves protocol block starts (`# Waves Framework — Agent Operating Protocol`)
    - Identify where it ends (the next `# ` H1 heading, or `---` followed by non-Waves content, or end of file)
-   - Preserve everything OUTSIDE the Waves protocol block (user's own rules, ecosystem directory, etc.)
+   - Preserve everything OUTSIDE the Waves protocol block
    - Replace the Waves protocol block with the LATEST version below
-   - Show the user a summary of what changed (e.g., "Added decision classification", "Added metacognition checkpoints")
 
 4. IF NOT FOUND:
    - Prepend the protocol block at the top of CLAUDE.md
-   - Tell the user: "Added the Waves Agent Operating Protocol to CLAUDE.md"
 
 5. IF CLAUDE.md DOES NOT EXIST:
    - Create it with the protocol block
-   - Tell the user: "Created CLAUDE.md with the Waves Agent Operating Protocol"
+
+## Step 5: Show upgrade summary
+
+```
+=== Upgrade Complete ===
+
+What was updated:
+  CLAUDE.md — Agent Operating Protocol updated to v2.1
+  [If metacognition_model was set:] user_pref.json — Metacognition model: [model]
+  [If metacognition_model already existed:] user_pref.json — Metacognition model already configured: [model]
+
+What's ready:
+  - 7 hooks active (perception, gate, enforcement, metacognition x3, dart-analyze)
+  - Background metacognition will trigger on objective/blueprint/phase changes
+  - Roadmap receives automatic progress notes
+  - Gate allows reading and artifact creation without logbook
+
+Restart your Claude Code session to activate the new hooks.
+===
+```
 
 ## Latest Protocol (replace the old block with this)
 
@@ -147,10 +237,10 @@ Every decision you make must be classified by impact level. When hooks are activ
 
 ### Metacognition Checkpoints
 
-At these moments, pause and reflect holistically with the user:
-- **Primary objective completed** → Read blueprint, roadmap, all logbooks. Share what you learned, risks you see, and recommendations.
-- **Blueprint changed** → Project cascading impacts on all active roadmaps and logbooks.
-- **Roadmap phase completed** → Full strategic audit with summary, alignment check, and recommendations for next phase.
+At these moments, a background analysis runs automatically. If critical findings are detected, you will be interrupted:
+- **Primary objective completed** → Background agent analyzes for blockers, design improvements, and effort savings
+- **Blueprint changed** → Background agent projects cascading impacts on roadmaps and logbooks
+- **Roadmap phase completed** → Background agent performs strategic readiness audit for the next phase
 
 ## What Makes You a Good Waves Agent
 
@@ -162,19 +252,4 @@ At these moments, pause and reflect holistically with the user:
 - You **preserve context** — update logbooks with decisions and learnings so the next session (or the next agent) doesn't start blind
 - You **don't invent** — if the blueprint doesn't mention it, ask before building it
 - You **see the whole board** — you don't just execute tasks, you spot risks, opportunities, and misalignments
-```
-
-## After updating CLAUDE.md
-
-Tell the user:
-```
-✅ Agent Operating Protocol updated to Waves 2.0
-
-Changes applied:
-• Decision Classification (5 levels) — added/updated
-• Metacognition Checkpoints (3 triggers) — added/updated
-• /waves:upgrade command — added to command table
-• Agent qualities — expanded (classify decisions, see the whole board)
-
-Your CLAUDE.md is now consistent with the installed hooks (v2.0).
 ```
