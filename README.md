@@ -68,6 +68,8 @@ Waves 1.x gave structure to chaos. **Waves 2.0 gives consciousness to structure.
 | **Proactive Metacognition** | Agent reflects at strategic moments | PostToolUse hooks trigger on objective completion, blueprint changes, phase completion |
 | **Context Survival** | Rules survive long sessions | SessionStart re-fires after context compaction, re-injecting state and rules |
 | **Graduated Governance** | Enforcement proportional to maturity | No blueprint → allow all; blueprint without roadmap → block; full artifacts → allow + classify |
+| **Smart Whitelisting** | Framework files, config, docs, and git workflow are never blocked | CLAUDE.md, ai_files/*, .claude/*, root *.md, package.json, pubspec.yaml, git add/commit/push — always allowed |
+| **Consent Bypass** | Opt out of blocking for projects in transition | `touch .claude/waves-gate-bypass` disables blocking while keeping classification |
 
 **Decision Classification — The Trust Contract:**
 
