@@ -11,7 +11,7 @@
 
 set -e
 
-VERSION="2.1.1"
+VERSION="2.1.2"
 
 # Colors for output
 RED='\033[0;31m'
@@ -327,6 +327,9 @@ init_claude() {
         fi
     fi
 
+    # Write local version marker
+    echo "$VERSION" > ".claude/waves-version"
+
     return 0
 }
 
@@ -530,7 +533,19 @@ cmd_upgrade() {
     [ -d "ai_files" ] && has_ai_files=true
 
     if $has_claude || $has_ai_files; then
-        echo -e "${BLUE}Updating current project...${NC}"
+        # Read local project version
+        local local_version="unknown"
+        if [ -f ".claude/waves-version" ]; then
+            local_version=$(cat ".claude/waves-version" 2>/dev/null)
+        fi
+
+        if [ "$local_version" = "$VERSION" ]; then
+            echo -e "${BLUE}Updating current project...${NC} (already at v${VERSION})"
+        elif [ "$local_version" = "unknown" ]; then
+            echo -e "${BLUE}Updating current project...${NC} (pre-2.1.2 → v${VERSION})"
+        else
+            echo -e "${BLUE}Updating current project...${NC} (v${local_version} → v${VERSION})"
+        fi
 
         # Re-resolve data_dir in case it changed after upgrade
         data_dir="$(get_data_dir)"
@@ -622,6 +637,12 @@ cmd_upgrade() {
     else
         echo -e "${CYAN}Not inside a waves project — only global installation was upgraded.${NC}"
         echo -e "To update a project, ${CYAN}cd${NC} into it and run ${CYAN}waves upgrade${NC} again."
+    fi
+
+    # Write local version marker
+    if $has_claude || $has_ai_files; then
+        mkdir -p .claude 2>/dev/null
+        echo "$VERSION" > ".claude/waves-version"
     fi
 
     echo ""

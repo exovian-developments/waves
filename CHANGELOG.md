@@ -5,6 +5,14 @@ All notable changes to waves will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.2] - 2026-04-18
+
+### Added
+
+- **Local project version tracking** — `waves init` and `waves upgrade` now write `.claude/waves-version` with the installed version. On subsequent upgrades, the command shows the version transition: "Updating current project... (v2.0.4 → v2.1.2)". Projects without the marker show "(pre-2.1.2 → v2.1.2)".
+
+---
+
 ## [2.1.1] - 2026-04-16
 
 ### Fixed
