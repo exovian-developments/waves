@@ -84,7 +84,19 @@ Edit `plugin/.claude-plugin/plugin.json`:
 }
 ```
 
-### 4. Commit and tag
+### 4. Validate schemas (pre-flight check)
+
+Every JSON schema must parse cleanly. A malformed schema cascades into every project that receives it via `waves upgrade`.
+
+```bash
+for f in schemas/*.json; do
+  jq empty "$f" || { echo "BROKEN: $f"; exit 1; }
+done
+```
+
+A non-zero exit here means **do not tag or publish** until the schema is fixed. Waves 2.1.7 shipped with a broken `logbook_software_schema.json` precisely because this step was skipped.
+
+### 5. Commit and tag
 
 ```bash
 git add .
@@ -93,7 +105,7 @@ git tag v0.2.0
 git push origin main --tags
 ```
 
-### 5. Build and publish
+### 6. Build and publish
 
 ```bash
 cd plugin/
