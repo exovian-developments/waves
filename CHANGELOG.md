@@ -5,6 +5,16 @@ All notable changes to waves will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.4] - 2026-04-18
+
+### Added
+
+- **Rule scope field** (`scope`) in `project_rules_schema.json` — required field with values `"ecosystem"` (identical across all projects in the organization, not modifiable locally) or `"local"` (project-specific, agent can modify). Enables consistent governance across multi-project organizations while keeping project-specific rules isolated.
+- **Scope protection in rules-update** — ecosystem rules cannot be modified, deleted, or rephrased from individual projects. The command flags attempts and requires explicit user override.
+- **Scope assignment in rules-create** — new rules require scope classification. Ecosystem rules are listed first within each section, followed by local rules.
+
+---
+
 ## [2.1.3] - 2026-04-18
 
 ### Fixed

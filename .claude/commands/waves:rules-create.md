@@ -160,6 +160,7 @@ Generate `ai_files/project_rules.json` with:
 - IDs starting at 1, incrementing
 - `created_at` timestamps in UTC ISO 8601
 - Descriptions max 280 characters
+- `scope` for each rule: "ecosystem" if the rule applies across all projects in the organization (shared conventions, architecture patterns, naming), "local" if it only applies to this project. Ask the user when uncertain. Within each section, list ecosystem rules first, then local.
 
 Validate the generated file against the schema.
 

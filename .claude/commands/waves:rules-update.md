@@ -115,11 +115,14 @@ Options:
 
 ### Step A6: Apply Updates
 
+**SCOPE PROTECTION:** Rules with `"scope": "ecosystem"` must NOT be modified, deleted, or rephrased. If the analysis detected a change that would affect an ecosystem rule, flag it to the user: "This change affects ecosystem rule #[id]. Ecosystem rules can only be modified from the organization's source of truth, not from individual projects." Skip it unless the user explicitly overrides.
+
 For approved changes:
-1. Add new rules with next available IDs.
-2. Update modified rules (set `updated_at`).
-3. Remove deprecated rules.
-4. Validate against schema.
+1. Add new rules with next available IDs. Ask scope for each new rule: "ecosystem" or "local".
+2. Update modified rules (set `updated_at`). Only local-scope rules.
+3. Remove deprecated rules. Only local-scope rules.
+4. Maintain ordering: ecosystem rules first, then local, within each section.
+5. Validate against schema.
 
 ### Step A7: Success Message
 

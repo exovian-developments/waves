@@ -51,7 +51,7 @@
     "rule": {
       "type": "object",
       "description": "Single concise rule with numeric identifier and timestamps.",
-      "required": ["id", "created_at", "description"],
+      "required": ["id", "created_at", "description", "scope"],
       "properties": {
         "id": {
           "type": "integer",
@@ -75,10 +75,16 @@
           "type": "string",
           "maxLength": 280,
           "description": "Concise project rule. Must not be overly long or context-dependent."
+        },
+        "scope": {
+          "type": "string",
+          "enum": ["ecosystem", "local"],
+          "description": "Governance level. ecosystem = identical across all projects in the organization. local = specific to this project.",
+          "$comment": "ecosystem: central governance rule. Should only be modified from the designated source of truth and propagated to all projects. An agent working in a specific project must NOT modify, delete, or rephrase ecosystem rules. local: project-specific rule. The agent can propose, modify, or delete it with /waves:rules-update."
         }
       },
-      "$comment": "When creating a rule: - Must apply the YAGNI principle to avoid overengineering. - Avoid creating rules for hypothetical scenarios or future features that may never be implemented. Focus on current project needs and avoid unnecessary complexity."
+      "$comment": "When creating a rule: - Must apply the YAGNI principle to avoid overengineering. - Avoid creating rules for hypothetical scenarios or future features that may never be implemented. Focus on current project needs and avoid unnecessary complexity. When scope is ecosystem, the rule must be identical across all project_rules.json in the organization. When scope is local, the rule only exists in the project where it was created."
     }
   },
-  "$comment": "All rules are mandatory, only create a new rule if it meets all the following criteria: - Promotes project-wide consistency. Improves code clarity, structure, and long-term maintainability. - Does not contradict or create ambiguity with other rules. - Establishes consistent project-wide implementation patterns that define how things should be done, and may include technical details when part of the project's standard practices, but not situational configurations or tool-specific setups. - Can be applied without requiring situational context or knowledge of a specific library. "
+  "$comment": "All rules are mandatory, only create a new rule if it meets all the following criteria: - Promotes project-wide consistency. Improves code clarity, structure, and long-term maintainability. - Does not contradict or create ambiguity with other rules. - Establishes consistent project-wide implementation patterns that define how things should be done, and may include technical details when part of the project's standard practices, but not situational configurations or tool-specific setups. - Can be applied without requiring situational context or knowledge of a specific library. Within each section, ecosystem rules go first, followed by local rules. This order is mandatory so the agent reads governance rules before project-specific ones."
 }

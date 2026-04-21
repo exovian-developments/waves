@@ -257,7 +257,7 @@ Update progress, change objective statuses, add new objectives discovered during
 | `user_pref_schema.json` | User interaction preferences | Both |
 | `software_manifest_schema.json` | Software project structure and tech | Software |
 | `general_manifest_schema.json` | Non-software project structure | General |
-| `project_rules_schema.json` | Coding rules and patterns | Software |
+| `project_rules_schema.json` | Coding rules and patterns (with ecosystem/local scope) | Software |
 | `project_standards_schema.json` | Standards for general projects | General |
 | `logbook_software_schema.json` | Development logbook with code refs | Software |
 | `logbook_general_schema.json` | Task logbook with doc refs | General |
