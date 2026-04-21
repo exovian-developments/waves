@@ -7,7 +7,6 @@
     "last_updated": "2026-04-14T00:00:00Z",
     "blueprint_type": "standard"
   },
-
   "philosophy": {
     "core_insight": "AI agents have compressed what used to take 6 months of development into days or weeks. The bottleneck is no longer coding — it's human validation, QA, and decision-making. Traditional iterative frameworks like Scrum were designed for a world where development was the slowest part. That world no longer exists.",
     "waves_model": "Waves replaces fixed-cadence sprints with organic, variable-length cycles called waves. Each wave is a complete unit of delivery: foundation → discovery → design → implementation → QA → production. A wave lasts as long as it needs — sometimes 3 days, sometimes 3 weeks — adapting to the actual rhythm of the work rather than forcing work into arbitrary time boxes.",
@@ -15,13 +14,11 @@
     "why_not_kanban": "Kanban optimizes for flow of individual items but lacks the strategic framing of a complete delivery cycle. Waves inherits Kanban's pull-based flexibility but adds what Kanban lacks: a bounded, coherent unit of product evolution with built-in feasibility analysis, architectural blueprinting, and progressive refinement from idea to production.",
     "why_waves": "A wave is the natural shape of AI-assisted product development: it starts with a swell of validation and planning (feasibility, foundation, blueprint), crests with rapid implementation (roadmap, logbook, objectives), and completes with quality assurance and release. Each wave leaves the product in a shippable state. Multiple waves can overlap for different product areas. The framework doesn't prescribe when to start the next wave — the team decides based on evidence, not a calendar."
   },
-
   "problem": {
     "pain": "Product development frameworks were designed for human-speed iteration. Scrum, SAFe, and Kanban assume development is the bottleneck and build ceremony and process around that assumption. But AI agents have inverted the equation — development now takes hours, not months. Teams using traditional frameworks with AI agents find themselves trapped in sprint ceremonies that add overhead to a process that no longer needs that coordination layer. Meanwhile, AI coding agents start every session blind — no memory of what the project is, what rules apply, what was done yesterday, or what remains.",
     "reality": "Every team adopting AI-assisted development faces a double crisis: (1) their development framework is designed for a cadence that no longer matches reality, and (2) their AI agents have no persistent, structured memory across sessions. The productivity gains from AI agents evaporate when wrapped in process overhead designed for human timelines, and when every session starts from scratch because there's no standard way to persist project knowledge.",
     "unsolved": "No existing framework addresses both problems simultaneously. Agile frameworks don't account for AI-speed development. AI context solutions (CLAUDE.md, memory features) don't provide lifecycle management. Waves solves both: it provides a wave-based delivery model that matches AI development speed, AND a schema-validated protocol that gives AI agents persistent, structured memory across sessions and across different agent platforms."
   },
-
   "target_users": [
     {
       "id": 1,
@@ -36,13 +33,9 @@
       "description": "A non-software professional (researcher, creative, business planner) using AI agents for structured work. They need the same context persistence and task tracking benefits but without software-specific assumptions — their project has documents and deliverables, not code and endpoints."
     }
   ],
-
   "product_hypothesis": "Waves will replace fixed-cadence frameworks like Scrum for AI-assisted product development by providing wave-based delivery cycles that adapt to AI-speed development, combined with a schema-validated protocol that gives AI agents persistent structured memory across sessions — eliminating both process overhead and context loss simultaneously.",
-
   "mission": "With Waves, teams work in organic delivery cycles that match the actual speed of AI-assisted development. Each wave carries a product increment from idea validation through implementation to production. AI agents start every session fully informed — knowing the project, the rules, the current wave, and what was done yesterday — because structured artifacts persist between sessions.",
-
   "vision": "The standard framework for AI-era product development: wave-based delivery cycles where AI agents operate as persistent team members with full project memory, any team can ship validated product increments at the speed their work demands rather than at the speed a calendar prescribes, and the framework works across any AI agent platform and any project type.",
-
   "out_of_scope": [
     {
       "id": 1,
@@ -61,7 +54,6 @@
       "statement": "Visual IDE plugin with UI panels — the protocol integrates through CLI slash commands and file-based artifacts. A full IDE GUI is tempting for discoverability but would fragment the codebase and limit agent-agnostic portability."
     }
   ],
-
   "design_principles": [
     {
       "id": 1,
@@ -112,7 +104,6 @@
       ]
     }
   ],
-
   "essential_capabilities": [
     {
       "id": 1,
@@ -121,30 +112,39 @@
     {
       "id": 2,
       "capability": "The user can generate a structured project manifest that captures architecture, technologies, features, and entry points — giving any AI agent a complete map of the codebase or project structure.",
-      "depends_on": [1]
+      "depends_on": [
+        1
+      ]
     },
     {
       "id": 3,
       "capability": "The user can extract and maintain coding rules (software) or project standards (general) from the codebase, with governance scope (ecosystem rules shared across all projects vs local rules specific to one project), so the AI agent follows established patterns, respects organizational governance, and doesn't modify rules that belong to the organization.",
-      "depends_on": [2]
+      "depends_on": [
+        2
+      ]
     },
     {
       "id": 4,
       "capability": "The user can create a development logbook for a ticket or task with structured objectives, code references, and completion guides, so work is traceable and resumable across sessions.",
-      "depends_on": [2]
+      "depends_on": [
+        2
+      ]
     },
     {
       "id": 5,
       "capability": "The user can update a logbook with progress entries, status changes, new objectives, and reminders — with automatic context compaction when the rolling window exceeds limits.",
-      "depends_on": [4]
+      "depends_on": [
+        4
+      ]
     },
     {
       "id": 6,
       "capability": "The user can generate a resolution document from a completed logbook, producing a structured summary of what was done, what was learned, and what changed.",
-      "depends_on": [4]
+      "depends_on": [
+        4
+      ]
     }
   ],
-
   "non_essential_capabilities": {
     "important": [
       {
@@ -179,7 +179,6 @@
       }
     ]
   },
-
   "essential_flows_and_views": {
     "user_flows": [
       {
@@ -188,7 +187,9 @@
         "entry_point": "User runs /waves:project-init in a new project.",
         "termination": "user_pref.json is created and CLAUDE.md is updated with required_reading references.",
         "description": "The command asks 6 questions: language, name+role, project type (software/general), familiarity level, tone, explanation depth. Answers populate user_pref.json. CLAUDE.md is updated to reference ai_files/ artifacts so subsequent sessions auto-load context.",
-        "capability_refs": [1]
+        "capability_refs": [
+          1
+        ]
       },
       {
         "id": 2,
@@ -196,7 +197,9 @@
         "entry_point": "User runs /waves:manifest-create after project-init.",
         "termination": "project_manifest.json is written with full project analysis.",
         "description": "The command detects project type from user_pref.json. For known software projects: 2 validation checkpoints, then 6 parallel subagents (entry-point-analyzer, navigation-mapper, flow-tracker, dependency-auditor, architecture-detective, feature-extractor) scan the codebase. Results are merged into a manifest following software_manifest_schema.json. User validates before write.",
-        "capability_refs": [2]
+        "capability_refs": [
+          2
+        ]
       },
       {
         "id": 3,
@@ -204,7 +207,9 @@
         "entry_point": "User runs /waves:logbook-create TICKET-123.json.",
         "termination": "Logbook file exists in ai_files/waves/[wN]/logbooks/ with objectives, scope, and completion guides.",
         "description": "User describes the ticket. The command traces code references using the manifest, proposes main objectives with scope (files + rules), dispatches secondary-objective-generator subagent for completion guides. User validates at 3 checkpoints: analysis, main objectives, secondary objectives. Final logbook is written.",
-        "capability_refs": [4]
+        "capability_refs": [
+          4
+        ]
       },
       {
         "id": 4,
@@ -212,7 +217,9 @@
         "entry_point": "User runs /waves:logbook-update TICKET-123.json during a work session.",
         "termination": "Logbook is updated with new context entries and/or status changes. Auto-compaction fires if recent_context exceeds 20 entries.",
         "description": "The command loads the logbook, checks due reminders, displays current status table. User chooses operation: add progress, update objective status, add new objective, or add reminder. The context-summarizer subagent handles compaction when triggered. Multiple updates can chain in one session.",
-        "capability_refs": [5]
+        "capability_refs": [
+          5
+        ]
       }
     ],
     "views": [
@@ -221,14 +228,18 @@
         "name": "Logbook status display",
         "state": "success",
         "description": "A table showing all objectives (main and secondary) with their current status (not_started/active/blocked/achieved/abandoned), plus the 3 most recent context entries. Displayed at the start of every logbook-update interaction so the user knows exactly where things stand.",
-        "capability_refs": [5]
+        "capability_refs": [
+          5
+        ]
       },
       {
         "id": 2,
         "name": "Manifest analysis output",
         "state": "success",
         "description": "Structured JSON output showing detected technologies, architecture layers, features, entry points, dependencies, and recommendations. Displayed for user validation before being written to disk.",
-        "capability_refs": [2]
+        "capability_refs": [
+          2
+        ]
       }
     ],
     "system_flows": [
@@ -255,7 +266,6 @@
       }
     ]
   },
-
   "secondary_flows_and_views": {
     "user_flows": [
       {
@@ -311,58 +321,72 @@
       }
     ]
   },
-
   "product_rules": [
     {
       "id": 1,
       "rule": "If a JSON schema field has a $comment, the LLM must treat it as an operational instruction that governs how to generate or validate that field's content.",
-      "principle_refs": [1],
+      "principle_refs": [
+        1
+      ],
       "applies_to": "All schema-driven generation across every command"
     },
     {
       "id": 2,
       "rule": "When starting any AI session in a project with ai_files/, load user_pref.json, project_manifest.json, and project_rules.json before processing any user request.",
-      "principle_refs": [2],
+      "principle_refs": [
+        2
+      ],
       "applies_to": "System flow: Context auto-loading at session start"
     },
     {
       "id": 3,
       "rule": "When a command requires scanning more than 3 files for analysis, dispatch the work to a specialized subagent instead of processing in the main thread.",
-      "principle_refs": [5],
+      "principle_refs": [
+        5
+      ],
       "applies_to": "All commands that perform codebase analysis (manifest-create, rules-create, logbook-create)"
     },
     {
       "id": 4,
       "rule": "When a command is invoked without parameters, enter interactive mode with guided questions and display a TIP showing the fast-path syntax. When invoked with parameters, skip all interactive steps.",
-      "principle_refs": [4],
+      "principle_refs": [
+        4
+      ],
       "applies_to": "All commands that accept optional parameters (logbook-create, logbook-update, rules-create, resolution-create)"
     },
     {
       "id": 5,
       "rule": "When recent_context in a logbook exceeds 20 entries, trigger automatic compaction: summarize overflow entries into history_summary and trim recent_context. Cap history_summary at 10 entries.",
-      "principle_refs": [2],
+      "principle_refs": [
+        2
+      ],
       "applies_to": "Essential capability #5: Logbook update cycle"
     },
     {
       "id": 6,
       "rule": "When implementation detail appears in a roadmap field, move it to the corresponding logbook. The roadmap tracks phases and milestones; the logbook tracks code-level work.",
-      "principle_refs": [6],
+      "principle_refs": [
+        6
+      ],
       "applies_to": "Roadmap creation and update commands"
     },
     {
       "id": 7,
       "rule": "When generating any protocol artifact, use JSON as the primary format. Offer .md only as a fallback for agents with known JSON limitations (e.g., Gemini CLI anchor issues).",
-      "principle_refs": [3],
+      "principle_refs": [
+        3
+      ],
       "applies_to": "All file generation across every command"
     },
     {
       "id": 8,
       "rule": "When presenting a user question during any interactive flow, always include an 'I don't know (auto-detect)' option so the user is never blocked by lack of knowledge.",
-      "principle_refs": [4],
+      "principle_refs": [
+        4
+      ],
       "applies_to": "All interactive commands"
     }
   ],
-
   "success_metrics": [
     {
       "id": 1,
@@ -389,9 +413,7 @@
       "failure_signal": "Non-software users hit dead ends where commands assume code, endpoints, or software architecture terminology."
     }
   ],
-
   "tech_stack": "Pure JSON schemas (JSON Schema draft 2020-12) and Markdown command definitions. No runtime dependencies. Distribution via: (1) git clone + manual copy, (2) Homebrew formula (planned), (3) Cowork .plugin ZIP for Claude Desktop. Commands execute within AI agent environments — Claude Code slash commands (.claude/commands/), Cowork plugin agents/commands/skills, or raw prompts for other agents. Subagent orchestration uses the host agent's built-in delegation tools (Task tool in Cowork, Agent tool in Claude Code). Validation possible with any JSON Schema validator (AJV, jsonschema). The protocol is stateless at the system level — all state lives in JSON files on the user's filesystem.",
-
   "product_decisions": [
     {
       "id": 1,
@@ -471,7 +493,6 @@
       "impact_on": "Philosophy section (must add human-in-the-loop as foundational principle), all metacognition triggers (must present findings to human, never act autonomously on Level 3+ decisions), classification system (Level 5 'discovery' mode exists specifically to channel AI perception to human judgment), out_of_scope (full autonomous operation without human checkpoints is explicitly out of scope)"
     }
   ],
-
   "open_questions": [
     {
       "id": 1,
@@ -495,9 +516,42 @@
       "resolution": null
     }
   ],
-
   "product_roadmaps": [
-    {"wave": "w2", "path": "waves/w2/roadmap.json"},
-    {"wave": "w1", "path": "waves/w1/roadmap.json"}
-  ]
+    {
+      "wave": "w2",
+      "path": "waves/w2/roadmap.json"
+    },
+    {
+      "wave": "w1",
+      "path": "waves/w1/roadmap.json"
+    }
+  ],
+  "recent_context": [
+    {
+      "id": 5,
+      "created_at": "2026-04-18T00:00:00Z",
+      "content": "LEVEL 5 DISCOVERY: The scope field (ecosystem/local) in project_rules reveals Waves is evolving from per-developer framework to organizational AI governance layer. The hierarchy company_blueprint → product_blueprint → ecosystem rules → local rules → logbooks is a governance chain where each level inherits constraints. Opens new market: per-organization pricing ($500-5000/mo) vs per-developer ($10-50/mo). No competitor has this chain. Implications for W3+: rules-sync command, PCC as compliance dashboard, certification as 'organizational AI governance architect'."
+    },
+    {
+      "id": 4,
+      "created_at": "2026-04-18T00:00:00Z",
+      "content": "Added scope field (ecosystem/local) to project_rules_schema. Capability #3 updated to include governance scope. Rules-create asks scope per rule. Rules-update protects ecosystem rules from local modification. Ecosystem rules go first in each section. Ordering enforced by schema $comment."
+    },
+    {
+      "id": 3,
+      "created_at": "2026-04-16T00:00:00Z",
+      "content": "Waves 2.1 shipped: background metacognition via subagents (Opus by default, configurable), mechanical roadmap progress on every objective completion, smart gate (whitelist for read-only, git, framework files, consent bypass), full session context loading (all blueprints + roadmaps + logbooks), debounce for cascading updates, narrative /waves:upgrade command with conditional config questions."
+    },
+    {
+      "id": 2,
+      "created_at": "2026-04-15T00:00:00Z",
+      "content": "Waves 2.0 released: 7 Claude Code hooks (perceive, gate, doc-enforce, metacognition, blueprint-impact, phase-audit, dart-analyze), 5-level decision classification validated with 18 benchmark scenarios (100% correct actions, conservative bias), graduated enforcement based on project maturity, context survival post-compaction. Category: Product Consciousness Framework."
+    },
+    {
+      "id": 1,
+      "created_at": "2026-04-15T00:00:00Z",
+      "content": "Metacognition validated in production: exovian_web_v1 agent detected 3 risks after 8 phases in one session (3K lines untested HTML, main.js as fragile point, Phase 10 verification needed). Agent recommended 'firebase serve before deploy' — quantified: '2 min fix now vs 30 min debug later.' First proof that the agent sees what the human cannot because they're focused on the immediate task."
+    }
+  ],
+  "history_summary": []
 }

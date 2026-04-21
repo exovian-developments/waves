@@ -70,6 +70,10 @@ Waves 1.x gave structure to chaos. **Waves 2.0 gives consciousness to structure.
 | **Graduated Governance** | Enforcement proportional to maturity | No blueprint → allow all; blueprint without roadmap → block; full artifacts → allow + classify |
 | **Smart Whitelisting** | Framework files, config, docs, and git workflow are never blocked | CLAUDE.md, ai_files/*, .claude/*, root *.md, package.json, pubspec.yaml, git add/commit/push — always allowed |
 | **Consent Bypass** | Opt out of blocking for projects in transition | `touch .claude/waves-gate-bypass` disables blocking while keeping classification |
+| **Rule Governance** | Ecosystem rules shared across projects, local rules per project | `scope: "ecosystem"` can't be modified locally; `scope: "local"` is project-specific |
+| **Product Living Memory** | Blueprint tracks its own evolution | `recent_context` + `history_summary` capture strategic events, discoveries, and pivots |
+| **Incremental Upgrades** | Version-aware migrations, no wasted steps | `/waves:upgrade` reads local version, applies only what changed, patches artifacts with new fields |
+| **Serendipity Detection** | Finds cross-vertical business opportunities | Metacognition asks: does this directly solve an operational problem in another area? |
 
 **Decision Classification — The Trust Contract:**
 
